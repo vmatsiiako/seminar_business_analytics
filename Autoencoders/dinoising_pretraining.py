@@ -8,9 +8,9 @@ import torch.nn as nn
 import cv2
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
-from DAE import DAE
-from d_DAE import d_DAE
-from utils import add_noise
+from Autoencoders.DAE import DAE
+from Autoencoders.d_DAE import d_DAE
+from Autoencoders.utils import add_noise
 
 
 # CONSTANTS
