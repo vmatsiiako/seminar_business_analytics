@@ -21,8 +21,8 @@ PICTURE_DIMENSION = 28
 BATCH_SIZE = 64
 NOISE_PERCENTAGE = 0.1
 HIDDEN_LAYERS = [500, 250, 100, 5]
-EPOCHS_PRETRAINING = 150
-EPOCHS_FINETUNING = 150
+EPOCHS_PRETRAINING = 10
+EPOCHS_FINETUNING = 10
 
 # import and extract the data
 df = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_train.csv")
