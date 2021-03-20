@@ -16,5 +16,7 @@ princa = pca.fit_transform(x)
 
 Q = coranking.coranking_matrix(df, princa)
 
-trust_pca = trustworthiness(Q, min_k=1, max_k=50)
-cont_pca = continuity(Q, min_k=1, max_k=50)
+trust_pca = trustworthiness(Q, min_k=10, max_k=20)
+#cont_pca = continuity(Q, min_k=10, max_k=20)
+print(trust_pca)
+#print(cont_pca)
