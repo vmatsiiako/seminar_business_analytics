@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("/Users/anoukveltman/Downloads/archive/sign_mnist_train.csv")
+df = pd.read_csv("../Data/sign_mnist_train.csv")
 
 features = df.columns[1:]
 x = df.loc[:, features].values
