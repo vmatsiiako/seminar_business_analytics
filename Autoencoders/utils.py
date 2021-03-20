@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def add_noise(img, noise_type, percentage):
+def add_noise(img, noise_type, percentage=None):
     img = img.astype(np.float32)
 
     if noise_type == "gaussian":
