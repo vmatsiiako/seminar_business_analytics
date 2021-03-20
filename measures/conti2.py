@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import coranking
 from coranking.metrics import continuity
-df = pd.read_csv(r'C:\Users\laura\Documents\bachelor courses\Seminar BAQM\sign_mnist_train.csv')
+df = pd.read_csv("../Data/sign_mnist_train.csv")
 
 features = df.columns[1:]
 X = df.loc[:, features].values
