@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+# import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -25,8 +25,8 @@ EPOCHS_PRETRAINING = 10
 EPOCHS_FINETUNING = 10
 
 # import and extract the data
-df = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_train.csv")
-df_test = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_test.csv")
+df = pd.read_csv("../Data/sign_mnist_train.csv")
+df_test = pd.read_csv("../Data/sign_mnist_test.csv")
 X_train = df.iloc[:,1:].values 
 y_train = df.iloc[:,0].values
 X_test = df_test.iloc[:,1:].values 
