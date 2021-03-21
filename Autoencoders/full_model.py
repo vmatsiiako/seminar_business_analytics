@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 
-class full_model(nn.Model):
-    def __init__(self, visible_dim, hidden_dim):
+class full_model(nn.Module):
 
     class d_DAE(nn.Module):
         def __init__(self, visible_dim, hidden_dim):
@@ -33,6 +32,40 @@ class full_model(nn.Model):
             p_h = h
             activation = torch.mm(p_h, self.W_decoder.t()) + self.v_bias
             return activation
+
+        def fit(self):
+            for hidden_dim in HIDDEN_LAYERS:
+                # train d_DAE
+                dae = d_DAE(visible_dim=visible_dim, hidden_dim=hidden_dim)
+                criterion = nn.MSELoss()
+                optimizer = torch.optim.Adam(dae.parameters(), lr=0.01, weight_decay=1e-5)
+
+                epochs = EPOCHS_PRETRAINING
+                l = len(dae_train_dl_clean)
+                losslist = list()
+                epochloss = 0
+                running_loss = 0
+                dataset_previous_layer_batched = []
+                for i, features in tqdm(enumerate(dae_train_dl_clean)):
+                    dataset_previous_layer_batched.append(features[0])
+
+                for epoch in range(epochs):
+
+                    print("Entering Epoch: ", epoch)
+                    for i, features in tqdm(enumerate(dae_train_dl_corrupted)):
+                        # -----------------Forward Pass----------------------
+                        output = dae(features[0])
+                        loss = criterion(output, dataset_previous_layer_batched[i])
+                        # -----------------Backward Pass---------------------
+                        optimizer.zero_grad()
+                        loss.backward()
+                        optimizer.step()
+
+                        running_loss += loss.item()
+                        epochloss += loss.item()
+                        # -----------------Log-------------------------------
+                losslist.append(running_loss / l)
+                running_loss = 0
 
     class DAE(nn.Module):
         def __init__(self, models):
@@ -91,4 +124,5 @@ class full_model(nn.Model):
 
     def fit(self):
         # use the training here
+
         return None
