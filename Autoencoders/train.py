@@ -18,12 +18,16 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-BATCH_SIZE = 64
+BATCH_SIZE = [32, 64]
 NOISE_PERCENTAGE = 0.1  #set it to "None" to impose gaussian noise
 GAUSSIAN_ST_DEV = 0.1   #set it to "None" to impose zero noise
-HIDDEN_LAYERS = [500, 250, 100, 5]
+HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5]]
 EPOCHS_PRETRAINING = 10
 EPOCHS_FINETUNING = 10
+
+parameters = {'batch_size':BATCH_SIZE,
+              'noise':[[0.1, None], [None, 0.1]],
+              'hidden_layers': HIDDEN_LAYERS}
 
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
