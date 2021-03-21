@@ -14,9 +14,6 @@ from Autoencoders.d_DAE import d_DAE
 from Autoencoders.utils import add_noise
 from torch.utils.tensorboard import SummaryWriter
 
-# default `log_dir` is "runs" - we'll be more specific here
-writer = SummaryWriter('runs/asl')
-
 
 class Model(nn.Module):
     def __init__(self):
@@ -28,6 +25,7 @@ class Model(nn.Module):
               HIDDEN_LAYERS,
               train_dl_clean,
               train_dl_noise,
+              test_dl,
               NOISE_TYPE="zeros",
               NUMBER_OF_PIXELS=784,
               GAUSSIAN_ST_DEV=None,
@@ -93,34 +91,29 @@ class Model(nn.Module):
         dae = DAE(models)
         optimizer = torch.optim.Adam(dae.parameters(), 1e-3)
         loss = nn.MSELoss()
-        ep_loss = 0
+        writer_train = SummaryWriter(f"./autoencoders_check_1_train"
+                                     f"_BATCH_SIZE_{str(BATCH_SIZE)}"
+                                     f"_NOISE_TYPE_{NOISE_TYPE}"
+                                     f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
+                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
+        writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
+                                     f"_BATCH_SIZE_{str(BATCH_SIZE)}"
+                                     f"_NOISE_TYPE_{NOISE_TYPE}"
+                                     f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
+                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
         for epoch in range(EPOCHS_FINETUNING):
             print(epoch)
+            ep_loss = 0
+            val_ep_loss = 0
+            for j, features in enumerate(test_dl):
+                batch_loss = loss(features[0], dae(features[0]))
+                val_ep_loss += batch_loss
+            writer_validation.add_scalar("Loss", val_ep_loss/len(test_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], dae(features[0]))
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()
                 ep_loss += batch_loss
-
-                writer.add_scalar('training loss', ep_loss, epoch * len(train_dl_clean) + i)
-
-            running_loss = 0.0
-
-        # # construct a plot that plots and saves the training history
-        # N = np.arange(0, EPOCHS_FINETUNING)
-        # plt.style.use("ggplot")
-        # plt.figure()
-        # plt.plot(N, dae.history["loss"], label="train_loss")
-        # plt.plot(N, dae.history["val_loss"], label="val_loss")
-        # plt.title("Training Loss and Accuracy")
-        # plt.xlabel("Epoch #")
-        # plt.ylabel("Loss/Accuracy")
-        # plt.legend(loc="lower left")
-        # plt.savefig(f'autoencoder_pictures_{str(BATCH_SIZE)}'
-        #             f'_Gaussian_{str(GAUSSIAN_ST_DEV)}'
-        #             f'_Zeros_{str(NOISE_PERCENTAGE)}'
-        #             f'_Pretrain_{str(EPOCHS_PRETRAINING)}'
-        #             f'_Layers_{str(HIDDEN_LAYERS)}.pdf')
-
+            writer_train.add_scalar("Loss", ep_loss/len(train_dl_clean), epoch)
         plt.show()
