@@ -142,8 +142,10 @@ for epoch in range(EPOCHS_FINETUNING):
         batch_loss.backward()
         optimizer.step()
         ep_loss += batch_loss
- 
-visualize = DataLoader(train_ds, batch_size=1, shuffle=False)
+
+X_test = torch.Tensor(X_test)
+test_ds = TensorDataset(X_test)
+visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
 for i, features in enumerate(visualize):
@@ -162,5 +164,5 @@ for i, features in enumerate(visualize):
     ax.get_yaxis().set_visible(False)
     if i == 9:
         break
-plt.show()
 plt.savefig('autoencoder_pictures.pdf')
+plt.show()
