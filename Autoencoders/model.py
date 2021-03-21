@@ -73,14 +73,17 @@ class Model(nn.Module):
             # rederive new data loader based on hidden activations of trained model
             new_data = np.array([dae.encode(data_list[0])[0].detach().numpy() for data_list in dae_train_dl_corrupted])
             new_data_corrupted = np.zeros(np.shape(new_data))
-            if GAUSSIAN_ST_DEV is not None:
-                for i in range(len(new_data)):
-                    new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='gaussian', sigma=GAUSSIAN_ST_DEV)
-
-            if NOISE_PERCENTAGE is not None:
-                for i in range(len(new_data)):
-                    new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='zeros', percentage=NOISE_PERCENTAGE)
+            # if GAUSSIAN_ST_DEV is not None:
+            #     for i in range(len(new_data)):
+            #         new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='gaussian', sigma=GAUSSIAN_ST_DEV)
+            #
+            # if NOISE_PERCENTAGE is not None:
+            #     for i in range(len(new_data)):
+            #         new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='zeros', percentage=NOISE_PERCENTAGE)
             # new_data= np.concatenate(new_data, axis=0)
+            for i in range(len(new_data)):
+                new_data_corrupted[i] = add_noise(new_data[i, :], noise_type=NOISE_TYPE, percentage=NOISE_PERCENTAGE)
+            new_data_corrupted = torch.Tensor(new_data_corrupted)
             dae_train_dl_clean = DataLoader(TensorDataset(torch.Tensor(new_data)), batch_size=BATCH_SIZE, shuffle=False)
             dae_train_dl_corrupted = DataLoader(TensorDataset(torch.Tensor(new_data_corrupted)), batch_size=BATCH_SIZE,
                                                 shuffle=False)
@@ -88,8 +91,8 @@ class Model(nn.Module):
             epoch = 0
 
         # fine-tune autoencoder
-        dae = DAE(models)
-        optimizer = torch.optim.Adam(dae.parameters(), 1e-3)
+        ae = DAE(models)
+        optimizer = torch.optim.Adam(ae.parameters(), 1e-3)
         loss = nn.MSELoss()
         writer_train = SummaryWriter(f"./autoencoders_check_1_train"
                                      f"_BATCH_SIZE_{str(BATCH_SIZE)}"
@@ -97,20 +100,20 @@ class Model(nn.Module):
                                      f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
                                      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
         writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
-                                     f"_BATCH_SIZE_{str(BATCH_SIZE)}"
-                                     f"_NOISE_TYPE_{NOISE_TYPE}"
-                                     f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
+                                          f"_BATCH_SIZE_{str(BATCH_SIZE)}"
+                                          f"_NOISE_TYPE_{NOISE_TYPE}"
+                                          f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
+                                          f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
         for epoch in range(EPOCHS_FINETUNING):
             print(epoch)
             ep_loss = 0
             val_ep_loss = 0
             for j, features in enumerate(test_dl):
-                batch_loss = loss(features[0], dae(features[0]))
+                batch_loss = loss(features[0], ae(features[0]))
                 val_ep_loss += batch_loss
             writer_validation.add_scalar("Loss", val_ep_loss/len(test_dl), epoch)
             for i, features in enumerate(train_dl_clean):
-                batch_loss = loss(features[0], dae(features[0]))
+                batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()

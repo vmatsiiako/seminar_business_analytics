@@ -44,7 +44,23 @@ y_train = df.iloc[:,0].values
 X_test = df_test.iloc[:,1:].values 
 y_test = df_test.iloc[:,0].values
 
+X_train_contrast = np.zeros(np.shape(X_train))
+for i in range(len(X_train_contrast)):
+    image = X_train[i, :]
+    image = image.astype(np.uint8)
+    X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
+X_test_contrast = np.zeros(np.shape(X_train))
+for i in range(len(X_test_contrast)):
+    image = X_train[i, :]
+    image = image.astype(np.uint8)
+    X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
+
+# normalize data
+X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 # acv = GridSearchCV(model, parameters)
 # acv.fit(X=train_dl_clean, train_dl_clean=train_dl_clean, train_dl_gaussian=train_dl_gaussian, train_dl_zeros=train_dl_zeros)
@@ -57,23 +73,23 @@ for i in range(4):
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
     # increase the contract of pictures
-    X_train_contrast = np.zeros(np.shape(X_train))
-    for i in range(len(X_train_contrast)):
-        image = X_train[i, :]
-        image = image.astype(np.uint8)
-        X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
+    # X_train_contrast = np.zeros(np.shape(X_train))
+    # for i in range(len(X_train_contrast)):
+    #     image = X_train[i, :]
+    #     image = image.astype(np.uint8)
+    #     X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
+    #
+    # X_test_contrast = np.zeros(np.shape(X_train))
+    # for i in range(len(X_test_contrast)):
+    #     image = X_train[i, :]
+    #     image = image.astype(np.uint8)
+    #     X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
-    X_test_contrast = np.zeros(np.shape(X_train))
-    for i in range(len(X_test_contrast)):
-        image = X_train[i, :]
-        image = image.astype(np.uint8)
-        X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
-
-    # normalize data
-    X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-    X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-    X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
-    X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
+    # # normalize data
+    # X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+    # X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+    # X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
+    # X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
     kf = KFold(n_splits=5)
     for train_index, test_index in kf.split(X_train_contrast):
