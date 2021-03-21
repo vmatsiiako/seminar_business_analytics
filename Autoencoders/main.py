@@ -15,6 +15,7 @@ from Autoencoders.DAE import DAE
 from Autoencoders.d_DAE import d_DAE
 from Autoencoders.utils import add_noise
 from Autoencoders.model import Model
+from sklearn.model_selection import KFold
 
 
 # CONSTANTS
@@ -49,7 +50,7 @@ y_test = df_test.iloc[:,0].values
 # acv.fit(X=train_dl_clean, train_dl_clean=train_dl_clean, train_dl_gaussian=train_dl_gaussian, train_dl_zeros=train_dl_zeros)
 
 
-for i in range(1):
+for i in range(4):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
     noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
@@ -74,28 +75,31 @@ for i in range(1):
     X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
     X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-    # Convert the data to torch types
-    X_train_clean = torch.Tensor(X_train_contrast)
-    X_test_clean = torch.Tensor(X_test_contrast)
-    X_train_noise = np.zeros(np.shape(X_train_contrast))
-    for i in range(len(X_train_contrast)):
-        X_train_noise[i] = add_noise(X_train_contrast[i, :], noise_type=NOISE_TYPE, percentage=noise_percentage)
-    X_train_noise = torch.Tensor(X_train_noise)
+    kf = KFold(n_splits=5)
+    for train_index, test_index in kf.split(X_train_contrast):
+        X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
+        # Convert the data to torch types
+        X_train_clean = torch.Tensor(X_train_contrast)
+        X_test_clean = torch.Tensor(X_test_contrast)
+        X_train_noise = np.zeros(np.shape(X_train_contrast))
+        for i in range(len(X_train_contrast)):
+            X_train_noise[i] = add_noise(X_train_contrast[i, :], noise_type=NOISE_TYPE, percentage=noise_percentage)
+        X_train_noise = torch.Tensor(X_train_noise)
 
-    train_ds_clean = TensorDataset(X_train_clean)
-    train_ds_noise = TensorDataset(X_train_noise)
-    test_ds = TensorDataset(X_test_clean)
-    train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
-    train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
-    test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
+        train_ds_clean = TensorDataset(X_train_clean)
+        train_ds_noise = TensorDataset(X_train_noise)
+        test_ds = TensorDataset(X_test_clean)
+        train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
+        train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
+        test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
-    model = Model()
-    model.fit(noise_percentage,
-              batch_size,
-              HIDDEN_LAYERS[0],
-              train_dl_clean,
-              train_dl_noise,
-              test_dl)
+        # model = Model()
+        # model.fit(noise_percentage,
+        #           batch_size,
+        #           HIDDEN_LAYERS[0],
+        #           train_dl_clean,
+        #           train_dl_noise,
+        #           test_dl)
 
 
 
