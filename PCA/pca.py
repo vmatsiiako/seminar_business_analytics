@@ -14,12 +14,12 @@ PICTURE_DIMENSION = 28
 
 
 # import and extract the data
-df = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_train.csv")
-df_test = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_test.csv")
+df = pd.read_csv("../Data/sign_mnist_train.csv")
+#df_test = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_test.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
-X_test = df_test.iloc[:,1:].values
-y_test = df_test.iloc[:,0].values
+#X_test = df_test.iloc[:,1:].values
+#y_test = df_test.iloc[:,0].values
 
 # increase the contract of pictures
 X_contrast = np.zeros(np.shape(X_train))
@@ -52,6 +52,7 @@ principalComponents = pca.fit_transform(X_contrast)
 principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2', 'pc3'])
 
 finalDf = pd.concat([principalDf, df[['label']]], axis=1)
+#finalDf.to_csv('results.csv', index=False, header=False)
 
 fig = plt.figure()
 from mpl_toolkits.mplot3d import Axes3D
