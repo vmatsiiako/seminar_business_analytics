@@ -103,10 +103,7 @@ class Model(nn.Module):
                 optimizer.step()
                 ep_loss += batch_loss
 
-                running_loss += batch_loss.item()
-                writer.add_scalar('training loss',
-                                  running_loss,
-                                  epoch * len(train_dl_clean) + i)
+                writer.add_scalar('training loss', ep_loss, epoch * len(train_dl_clean) + i)
 
             running_loss = 0.0
 
