@@ -46,10 +46,6 @@ X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 # Convert the data to torch types
-X = torch.Tensor(X_contrast)
-train_ds = TensorDataset(X)
-train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=False)
-
 X_clean = torch.Tensor(X_contrast)
 X_noise_zeros = np.zeros(np.shape(X_contrast))
 for i in range(len(X_contrast)):
@@ -136,7 +132,7 @@ loss = nn.MSELoss()
 ep_loss = 0
 for epoch in range(EPOCHS_FINETUNING):
     print(epoch)
-    for i, features in enumerate(train_dl): 
+    for i, features in enumerate(train_dl_clean):
         batch_loss = loss(features[0], dae(features[0]))
         optimizer.zero_grad()
         batch_loss.backward()
