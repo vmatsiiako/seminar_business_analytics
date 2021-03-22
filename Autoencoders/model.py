@@ -25,12 +25,12 @@ class Model(nn.Module):
               HIDDEN_LAYERS,
               train_dl_clean,
               train_dl_noise,
-              test_dl,
+              validation_dl,
               NOISE_TYPE="zeros",
               NUMBER_OF_PIXELS=784,
               GAUSSIAN_ST_DEV=None,
-              EPOCHS_PRETRAINING=10,
-              EPOCHS_FINETUNING=10):
+              EPOCHS_PRETRAINING=5,
+              EPOCHS_FINETUNING=5):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -104,14 +104,16 @@ class Model(nn.Module):
                                           f"_NOISE_TYPE_{NOISE_TYPE}"
                                           f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
                                           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
+        val_loss = []
         for epoch in range(EPOCHS_FINETUNING):
             print(epoch)
             ep_loss = 0
             val_ep_loss = 0
-            for j, features in enumerate(test_dl):
+            for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
                 val_ep_loss += batch_loss
-            writer_validation.add_scalar("Loss", val_ep_loss/len(test_dl), epoch)
+                val_loss.append(val_ep_loss)
+            writer_validation.add_scalar("Loss", val_ep_loss/len(validation_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
@@ -120,3 +122,6 @@ class Model(nn.Module):
                 ep_loss += batch_loss
             writer_train.add_scalar("Loss", ep_loss/len(train_dl_clean), epoch)
         plt.show()
+
+        return val_loss, ae
+

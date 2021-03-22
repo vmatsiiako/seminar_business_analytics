@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib as plt
 
 
 def add_noise(img, noise_type, percentage=None, sigma=None):

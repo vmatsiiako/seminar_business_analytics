@@ -31,10 +31,10 @@ HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5]]
 EPOCHS_PRETRAINING = 10
 EPOCHS_FINETUNING = 10
 
-parameters = {"NOISE_PERCENTAGE": NOISE_PERCENTAGE
-    # ,
-    #           'hidden_layers': HIDDEN_LAYERS
-              }
+# parameters = {"NOISE_PERCENTAGE": NOISE_PERCENTAGE
+#     # ,
+#     #           'hidden_layers': HIDDEN_LAYERS
+#               }
 
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -66,7 +66,7 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 # acv.fit(X=train_dl_clean, train_dl_clean=train_dl_clean, train_dl_gaussian=train_dl_gaussian, train_dl_zeros=train_dl_zeros)
 
 
-for i in range(4):
+for i in range(2):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
     noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
@@ -92,30 +92,54 @@ for i in range(4):
     # X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
     kf = KFold(n_splits=5)
+    current_hyperparameter_losses = []
     for train_index, test_index in kf.split(X_train_contrast):
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
-        X_train_clean = torch.Tensor(X_train_contrast)
-        X_test_clean = torch.Tensor(X_test_contrast)
-        X_train_noise = np.zeros(np.shape(X_train_contrast))
-        for i in range(len(X_train_contrast)):
-            X_train_noise[i] = add_noise(X_train_contrast[i, :], noise_type=NOISE_TYPE, percentage=noise_percentage)
+        X_train_clean = torch.Tensor(X_train_CV)
+        X_validation_clean = torch.Tensor(X_validation_CV)
+        X_train_noise = np.zeros(np.shape(X_train_CV))
+        for i in range(len(X_train_CV)):
+            X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=NOISE_TYPE, percentage=noise_percentage)
         X_train_noise = torch.Tensor(X_train_noise)
 
         train_ds_clean = TensorDataset(X_train_clean)
         train_ds_noise = TensorDataset(X_train_noise)
-        test_ds = TensorDataset(X_test_clean)
+        validation_ds = TensorDataset(X_validation_clean)
         train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
         train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
-        test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
+        validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
 
-        # model = Model()
-        # model.fit(noise_percentage,
-        #           batch_size,
-        #           HIDDEN_LAYERS[0],
-        #           train_dl_clean,
-        #           train_dl_noise,
-        #           test_dl)
+        model = Model()
+        val_loss, ae = model.fit(noise_percentage,
+                                    batch_size,
+                                    hidden_layers,
+                                    train_dl_clean,
+                                    train_dl_noise,
+                                    validation_dl)
+        current_validation_losses = np.append(current_hyperparameter_losses, val_loss, axis=1)
+
+    average_loss = current_validation_losses.mean(axis=0)
+    minimum_loss = average_loss.min()
+    epoch = average_loss.argmin()
+
+    if i ==0 or minimum_loss < optimal_loss:
+        optimal_loss = minimum_loss
+        optimal_noise = noise_percentage
+        optimal_batch_size = batch_size
+        optimal_hidden_layers = hidden_layers
+
+X_test_contrast = torch.Tensor(X_test_contrast)
+test_ds = TensorDataset(X_test_contrast)
+visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
+final_model = Model()
+test_loss, autoencoder = final_model.fit(optimal_noise,
+                                         optimal_batch_size,
+                                         optimal_hidden_layers,
+                                         train_dl_clean,
+                                         train_dl_noise,
+                                         visualize)
+
 
 
 
