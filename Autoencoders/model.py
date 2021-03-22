@@ -112,7 +112,7 @@ class Model(nn.Module):
             for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
                 val_ep_loss += batch_loss
-                val_loss.append(val_ep_loss)
+            val_loss.append(val_ep_loss)
             writer_validation.add_scalar("Loss", val_ep_loss/len(validation_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))

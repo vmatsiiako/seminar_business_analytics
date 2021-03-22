@@ -28,8 +28,9 @@ NOISE_TYPE = 'zeros'
 NOISE_PERCENTAGE = [0, 0.1, 0.2]  #set it to "None" to impose gaussian noise
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5]]
-EPOCHS_PRETRAINING = 10
-EPOCHS_FINETUNING = 10
+EPOCHS_PRETRAINING = 5
+EPOCHS_FINETUNING = 5
+NUMBER_FOLDS = 5
 
 # parameters = {"NOISE_PERCENTAGE": NOISE_PERCENTAGE
 #     # ,
@@ -91,8 +92,10 @@ for i in range(2):
     # X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
     # X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-    kf = KFold(n_splits=5)
-    current_hyperparameter_losses = []
+    kf = KFold(n_splits=NUMBER_FOLDS)
+    current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
+    column=0
+    optimal_loss = float('inf')
     for train_index, test_index in kf.split(X_train_contrast):
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
@@ -117,11 +120,15 @@ for i in range(2):
                                     train_dl_clean,
                                     train_dl_noise,
                                     validation_dl)
-        current_validation_losses = np.append(current_hyperparameter_losses, val_loss, axis=1)
+        val_loss =np.array(val_loss)
+        current_validation_losses[:, column] = val_loss
+        column += 1
+        print("FInished first set of hyperparameters")
 
-    average_loss = current_validation_losses.mean(axis=0)
+    average_loss = current_validation_losses.mean(axis=1)
     minimum_loss = average_loss.min()
     epoch = average_loss.argmin()
+
 
     if i ==0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
@@ -143,24 +150,24 @@ test_loss, autoencoder = final_model.fit(optimal_noise,
 
 
 
-# X_test = torch.Tensor(X_test)
-# test_ds = TensorDataset(X_test)
-# visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
-# NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
-# plt.figure(figsize=(20, 4))
-# for i, features in enumerate(visualize):
-#     # Display original
-#     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
-#     plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-#     plt.gray()
-#     ax.get_xaxis().set_visible(False)
-#     ax.get_yaxis().set_visible(False)
-#
-#     # Display reconstruction
-#     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
-#     plt.imshow(dae(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-#     plt.gray()
-#     ax.get_xaxis().set_visible(False)
-#     ax.get_yaxis().set_visible(False)
-#     if i == 9:
-#         break
+X_test_contrast = torch.Tensor(X_test_contrast)
+test_ds = TensorDataset(X_test_contrast)
+visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
+NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
+plt.figure(figsize=(20, 4))
+for i, features in enumerate(visualize):
+    # Display original
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
+    plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    # Display reconstruction
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
+    plt.imshow(autoencoder(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    if i == 9:
+        break
