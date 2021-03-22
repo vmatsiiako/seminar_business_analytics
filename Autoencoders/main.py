@@ -32,10 +32,6 @@ EPOCHS_PRETRAINING = 5
 EPOCHS_FINETUNING = 5
 NUMBER_FOLDS = 5
 
-# parameters = {"NOISE_PERCENTAGE": NOISE_PERCENTAGE
-#     # ,
-#     #           'hidden_layers': HIDDEN_LAYERS
-#               }
 
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -63,9 +59,7 @@ X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-# acv = GridSearchCV(model, parameters)
-# acv.fit(X=train_dl_clean, train_dl_clean=train_dl_clean, train_dl_gaussian=train_dl_gaussian, train_dl_zeros=train_dl_zeros)
-
+kf = KFold(n_splits=NUMBER_FOLDS)
 
 for i in range(2):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
@@ -92,9 +86,8 @@ for i in range(2):
     # X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
     # X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-    kf = KFold(n_splits=NUMBER_FOLDS)
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
-    column=0
+    column = 0
     optimal_loss = float('inf')
     for train_index, test_index in kf.split(X_train_contrast):
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
@@ -115,22 +108,21 @@ for i in range(2):
 
         model = Model()
         val_loss, ae = model.fit(noise_percentage,
-                                    batch_size,
-                                    hidden_layers,
-                                    train_dl_clean,
-                                    train_dl_noise,
-                                    validation_dl)
-        val_loss =np.array(val_loss)
+                                 batch_size,
+                                 hidden_layers,
+                                 train_dl_clean,
+                                 train_dl_noise,
+                                 validation_dl)
+        val_loss = np.array(val_loss)
         current_validation_losses[:, column] = val_loss
         column += 1
-        print("FInished first set of hyperparameters")
+        print("Finished first set of hyperparameters")
 
     average_loss = current_validation_losses.mean(axis=1)
     minimum_loss = average_loss.min()
     epoch = average_loss.argmin()
 
-
-    if i ==0 or minimum_loss < optimal_loss:
+    if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
         optimal_noise = noise_percentage
         optimal_batch_size = batch_size
