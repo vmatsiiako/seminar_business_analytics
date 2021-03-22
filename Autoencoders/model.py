@@ -1,6 +1,5 @@
-import pandas as pd
 import numpy as np
-import tensorflow as tf
+import datetime.datetime as dt
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -42,18 +41,17 @@ class Model(nn.Module):
             criterion = nn.MSELoss()
             optimizer = torch.optim.Adam(dae.parameters(), lr=0.01, weight_decay=1e-5)
 
-            epochs = EPOCHS_PRETRAINING
             l = len(dae_train_dl_clean)
             losslist = list()
-            epochloss = 0
+            epoch_loss = 0
             running_loss = 0
             dataset_previous_layer_batched = []
             for i, features in tqdm(enumerate(dae_train_dl_clean)):
                 dataset_previous_layer_batched.append(features[0])
 
-            for epoch in range(epochs):
+            for epoch in range(EPOCHS_PRETRAINING):
 
-                print("Entering Epoch: ", epoch)
+                print("Pretraining Epoch #", epoch)
                 for i, features in tqdm(enumerate(dae_train_dl_corrupted)):
                     # -----------------Forward Pass----------------------
                     output = dae(features[0])
@@ -64,23 +62,15 @@ class Model(nn.Module):
                     optimizer.step()
 
                     running_loss += loss.item()
-                    epochloss += loss.item()
+                    epoch_loss += loss.item()
                     # -----------------Log-------------------------------
             losslist.append(running_loss / l)
-            running_loss = 0
 
             models.append(dae)
             # rederive new data loader based on hidden activations of trained model
             new_data = np.array([dae.encode(data_list[0])[0].detach().numpy() for data_list in dae_train_dl_corrupted])
             new_data_corrupted = np.zeros(np.shape(new_data))
-            # if GAUSSIAN_ST_DEV is not None:
-            #     for i in range(len(new_data)):
-            #         new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='gaussian', sigma=GAUSSIAN_ST_DEV)
-            #
-            # if NOISE_PERCENTAGE is not None:
-            #     for i in range(len(new_data)):
-            #         new_data_corrupted[i] = add_noise(new_data[i, :], noise_type='zeros', percentage=NOISE_PERCENTAGE)
-            # new_data= np.concatenate(new_data, axis=0)
+
             for i in range(len(new_data)):
                 new_data_corrupted[i] = add_noise(new_data[i, :], noise_type=NOISE_TYPE, percentage=NOISE_PERCENTAGE)
             new_data_corrupted = torch.Tensor(new_data_corrupted)
@@ -88,7 +78,6 @@ class Model(nn.Module):
             dae_train_dl_corrupted = DataLoader(TensorDataset(torch.Tensor(new_data_corrupted)), batch_size=BATCH_SIZE,
                                                 shuffle=False)
             visible_dim = hidden_dim
-            epoch = 0
 
         # fine-tune autoencoder
         ae = DAE(models)
@@ -98,29 +87,31 @@ class Model(nn.Module):
                                      f"_BATCH_SIZE_{str(BATCH_SIZE)}"
                                      f"_NOISE_TYPE_{NOISE_TYPE}"
                                      f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
+                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
+                                     f"_TIME_{dt.now()}")
         writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
                                           f"_BATCH_SIZE_{str(BATCH_SIZE)}"
                                           f"_NOISE_TYPE_{NOISE_TYPE}"
                                           f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-                                          f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]")
+                                          f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
+                                          f"_TIME_{dt.now()}")
         val_loss = []
         for epoch in range(EPOCHS_FINETUNING):
-            print(epoch)
-            ep_loss = 0
-            val_ep_loss = 0
+            print("Fine-tuning Epoch #" + str(epoch))
+            epoch_loss = 0
+            validation_epoch_loss = 0
             for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
-                val_ep_loss += batch_loss
-            val_loss.append(val_ep_loss)
-            writer_validation.add_scalar("Loss", val_ep_loss/len(validation_dl), epoch)
+                validation_epoch_loss += batch_loss
+            val_loss.append(validation_epoch_loss)
+            writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()
-                ep_loss += batch_loss
-            writer_train.add_scalar("Loss", ep_loss/len(train_dl_clean), epoch)
+                epoch_loss += batch_loss
+            writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
         plt.show()
 
         return val_loss, ae
