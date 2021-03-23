@@ -29,7 +29,7 @@ class Model(nn.Module):
               EPOCHS_FINETUNING,
               NUMBER_OF_PIXELS=784,
               GAUSSIAN_ST_DEV=None,
-              EPOCHS_PRETRAINING=10):
+              EPOCHS_PRETRAINING=2):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -99,15 +99,28 @@ class Model(nn.Module):
         #                                   )
         val_loss = []
         train_loss = []
+        # for epoch in range(EPOCHS_FINETUNING):
+        #     print("Fine-tuning Epoch #" + str(epoch))
+        #     epoch_loss = 0
+        #     validation_epoch_loss = 0
+        #     for j, features in enumerate(validation_dl):
+        #         batch_loss = loss(features[0], ae(features[0]))
+        #         validation_epoch_loss += batch_loss
+        #     val_loss.append(validation_epoch_loss/len(validation_dl))
+        #     # writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
+        #     for i, features in enumerate(train_dl_clean):
+        #         batch_loss = loss(features[0], ae(features[0]))
+        #         optimizer.zero_grad()
+        #         batch_loss.backward()
+        #         optimizer.step()
+        #         epoch_loss += batch_loss
+        #     train_loss.append(epoch_loss/len(train_dl_clean))
+        #     # writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
+
         for epoch in range(EPOCHS_FINETUNING):
             print("Fine-tuning Epoch #" + str(epoch))
             epoch_loss = 0
             validation_epoch_loss = 0
-            for j, features in enumerate(validation_dl):
-                batch_loss = loss(features[0], ae(features[0]))
-                validation_epoch_loss += batch_loss
-            val_loss.append(validation_epoch_loss/len(validation_dl))
-            # writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
@@ -115,7 +128,10 @@ class Model(nn.Module):
                 optimizer.step()
                 epoch_loss += batch_loss
             train_loss.append(epoch_loss/len(train_dl_clean))
-            # writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
+            for j, features in enumerate(validation_dl):
+                batch_loss = loss(features[0], ae(features[0]))
+                validation_epoch_loss += batch_loss
+            val_loss.append(validation_epoch_loss/len(validation_dl))
         plt.show()
 
         return val_loss, train_loss, ae

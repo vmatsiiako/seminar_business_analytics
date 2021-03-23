@@ -28,8 +28,8 @@ NOISE_TYPE = ['zeros', 'gaussian']
 NOISE_PERCENTAGE = [0, 0.1, 0.2, 0.3, 0.4]  #set it to "None" to impose gaussian noise
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
-EPOCHS_PRETRAINING = 10
-EPOCHS_FINETUNING = 30
+EPOCHS_PRETRAINING = 2
+EPOCHS_FINETUNING = 2
 NUMBER_FOLDS = 5
 
 
@@ -61,7 +61,7 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 kf = KFold(n_splits=NUMBER_FOLDS)
 
-for i in range(1):
+for i in range(2):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
     noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
