@@ -108,7 +108,7 @@ for i in range(1):
     minimum_loss = average_validation_loss.min()
     epoch = average_validation_loss.argmin()+1
 
-    N = np.arange(1, EPOCHS_FINETUNING)
+    N = np.arange(0, EPOCHS_FINETUNING)
     plt.style.use("ggplot")
     plt.figure()
     plt.plot(N, average_training_loss, label="train_loss")
