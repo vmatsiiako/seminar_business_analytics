@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib
+from sklearn.metrics import silhouette_score
+
 matplotlib.use('TkAgg')
 
 #https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
@@ -21,8 +23,15 @@ pca = PCA(n_components=2)
 x = StandardScaler().fit_transform(X_train)
 princa = pca.fit_transform(x)
 
+scaler = StandardScaler()
+scaler.fit(df)
+X_scale = scaler.transform(df)
+df_scale = pd.DataFrame(X_scale, columns=df.columns)
+df_scale.head()
+
 kmeans = KMeans(init="k-means++", n_clusters=24, n_init=4)
-kmeans.fit(princa)
+kmeans_pca = kmeans.fit(princa)
+print('KMeans PCA Scaled Silhouette Score: {}'.format(silhouette_score(df_scale, kmeans_pca.labels_, metric='euclidean')))
 
 h = .02
 
