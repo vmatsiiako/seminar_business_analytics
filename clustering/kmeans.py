@@ -3,8 +3,8 @@ import matplotlib
 from sklearn.metrics import silhouette_score
 
 matplotlib.use('TkAgg')
-
 #https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
+#https://towardsdatascience.com/explaining-k-means-clustering-5298dc47bad6
 
 from sklearn.decomposition import PCA
 import numpy as np
