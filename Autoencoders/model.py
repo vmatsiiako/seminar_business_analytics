@@ -25,11 +25,11 @@ class Model(nn.Module):
               train_dl_clean,
               train_dl_noise,
               validation_dl,
-              NOISE_TYPE="zeros",
+              NOISE_TYPE,
+              EPOCHS_FINETUNING,
               NUMBER_OF_PIXELS=784,
               GAUSSIAN_ST_DEV=None,
-              EPOCHS_PRETRAINING=2,
-              EPOCHS_FINETUNING=2):
+              EPOCHS_PRETRAINING=10):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -83,20 +83,20 @@ class Model(nn.Module):
         ae = DAE(models)
         optimizer = torch.optim.Adam(ae.parameters(), 1e-3)
         loss = nn.MSELoss()
-        writer_train = SummaryWriter(f"./autoencoders_check_1_train"
-                                     f"_BATCH_SIZE_{str(BATCH_SIZE)}"
-                                     f"_NOISE_TYPE_{NOISE_TYPE}"
-                                     f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-                                     f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-                                     #f"_TIME_{dt.now()}"
-                                     )
-        writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
-                                          f"_BATCH_SIZE_{str(BATCH_SIZE)}"
-                                          f"_NOISE_TYPE_{NOISE_TYPE}"
-                                          f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-                                          f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-                                          #f"_TIME_{dt.now()}"
-                                          )
+        # writer_train = SummaryWriter(f"./autoencoders_check_1_train"
+        #                              f"_BATCH_SIZE_{str(BATCH_SIZE)}"
+        #                              f"_NOISE_TYPE_{NOISE_TYPE}"
+        #                              f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
+        #                              f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
+        #                              #f"_TIME_{dt.now()}"
+        #                              )
+        # writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
+        #                                   f"_BATCH_SIZE_{str(BATCH_SIZE)}"
+        #                                   f"_NOISE_TYPE_{NOISE_TYPE}"
+        #                                   f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
+        #                                   f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
+        #                                   #f"_TIME_{dt.now()}"
+        #                                   )
         val_loss = []
         train_loss = []
         for epoch in range(EPOCHS_FINETUNING):
@@ -106,16 +106,16 @@ class Model(nn.Module):
             for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
                 validation_epoch_loss += batch_loss
-            val_loss.append(validation_epoch_loss)
-            writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
+            val_loss.append(validation_epoch_loss/len(validation_dl))
+            # writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()
                 epoch_loss += batch_loss
-            train_loss.append(epoch_loss)
-            writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
+            train_loss.append(epoch_loss/len(train_dl_clean))
+            # writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
         plt.show()
 
         return val_loss, train_loss, ae

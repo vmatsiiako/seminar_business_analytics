@@ -23,13 +23,13 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-BATCH_SIZE = [16, 32, 64]
+BATCH_SIZE = [16, 32, 64, 8]
 NOISE_TYPE = ['zeros', 'gaussian']
-NOISE_PERCENTAGE = [0, 0.1, 0.2]  #set it to "None" to impose gaussian noise
+NOISE_PERCENTAGE = [0, 0.1, 0.2, 0.3, 0.4]  #set it to "None" to impose gaussian noise
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
-HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5]]
-EPOCHS_PRETRAINING = 2
-EPOCHS_FINETUNING = 2
+HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
+EPOCHS_PRETRAINING = 10
+EPOCHS_FINETUNING = 30
 NUMBER_FOLDS = 5
 
 
@@ -80,7 +80,7 @@ for i in range(1):
         X_validation_clean = torch.Tensor(X_validation_CV)
         X_train_noise = np.zeros(np.shape(X_train_CV))
         for i in range(len(X_train_CV)):
-            X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=NOISE_TYPE, percentage=noise_percentage)
+            X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=noise_type, percentage=noise_percentage)
         X_train_noise = torch.Tensor(X_train_noise)
 
         train_ds_clean = TensorDataset(X_train_clean)
@@ -96,7 +96,9 @@ for i in range(1):
                                              hidden_layers,
                                              train_dl_clean,
                                              train_dl_noise,
-                                             validation_dl)
+                                             validation_dl,
+                                             noise_type,
+                                             EPOCHS_FINETUNING)
         val_loss = np.array(val_loss)
         train_loss = np.array(train_loss)
         current_validation_losses[:, column] = val_loss
@@ -120,25 +122,29 @@ for i in range(1):
     plt.savefig(f"loss_graph"
                 f"_BATCH_SIZE_{str(batch_size)}"
                 f"_NOISE_TYPE_{noise_type}"
-                f"_NOISE_PERCENTAGE_{str(noise_percentage)}"
+                f"_NOISE_PERCENTAGE_{str(noise_percentage).replace('.', ',')}"
                 f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]")
 
     if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
         optimal_noise = noise_percentage
+        optimal_noise_type = noise_type
         optimal_batch_size = batch_size
         optimal_hidden_layers = hidden_layers
+        optimal_epoch = epoch
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
 final_model = Model()
 test_loss, training, autoencoder = final_model.fit(optimal_noise,
-                                         optimal_batch_size,
-                                         optimal_hidden_layers,
-                                         train_dl_clean,
-                                         train_dl_noise,
-                                         visualize)
+                                                   optimal_batch_size,
+                                                   optimal_hidden_layers,
+                                                   train_dl_clean,
+                                                   train_dl_noise,
+                                                   visualize,
+                                                   optimal_noise_type,
+                                                   optimal_epoch)
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
