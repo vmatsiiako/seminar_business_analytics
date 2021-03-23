@@ -21,7 +21,7 @@ for k in k_list:
     km.fit(df_scale)
     sse.append([k, km.inertia_])
 
-oca_results_scale = pd.DataFrame({'Cluster': range(1, 15), 'SSE': sse})
+oca_results_scale = pd.DataFrame({'Cluster': range(1, 26), 'SSE': sse})
 plt.figure(figsize=(12, 6))
 plt.plot(pd.DataFrame(sse)[0], pd.DataFrame(sse)[1], marker='o')
 plt.title('Optimal Number of Clusters using Elbow Method (Scaled Data)')
