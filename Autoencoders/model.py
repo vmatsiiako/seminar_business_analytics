@@ -1,5 +1,5 @@
 import numpy as np
-import datetime.datetime as dt
+# import datetime.datetime as dt
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -28,8 +28,8 @@ class Model(nn.Module):
               NOISE_TYPE="zeros",
               NUMBER_OF_PIXELS=784,
               GAUSSIAN_ST_DEV=None,
-              EPOCHS_PRETRAINING=5,
-              EPOCHS_FINETUNING=5):
+              EPOCHS_PRETRAINING=2,
+              EPOCHS_FINETUNING=2):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -88,14 +88,17 @@ class Model(nn.Module):
                                      f"_NOISE_TYPE_{NOISE_TYPE}"
                                      f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
                                      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-                                     f"_TIME_{dt.now()}")
+                                     #f"_TIME_{dt.now()}"
+                                     )
         writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
                                           f"_BATCH_SIZE_{str(BATCH_SIZE)}"
                                           f"_NOISE_TYPE_{NOISE_TYPE}"
                                           f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
                                           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-                                          f"_TIME_{dt.now()}")
+                                          #f"_TIME_{dt.now()}"
+                                          )
         val_loss = []
+        train_loss = []
         for epoch in range(EPOCHS_FINETUNING):
             print("Fine-tuning Epoch #" + str(epoch))
             epoch_loss = 0
@@ -111,8 +114,9 @@ class Model(nn.Module):
                 batch_loss.backward()
                 optimizer.step()
                 epoch_loss += batch_loss
+            train_loss.append(epoch_loss)
             writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
         plt.show()
 
-        return val_loss, ae
+        return val_loss, train_loss, ae
 

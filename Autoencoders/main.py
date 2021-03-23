@@ -24,12 +24,12 @@ MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64]
-NOISE_TYPE = 'zeros'
+NOISE_TYPE = ['zeros', 'gaussian']
 NOISE_PERCENTAGE = [0, 0.1, 0.2]  #set it to "None" to impose gaussian noise
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5]]
-EPOCHS_PRETRAINING = 5
-EPOCHS_FINETUNING = 5
+EPOCHS_PRETRAINING = 2
+EPOCHS_FINETUNING = 2
 NUMBER_FOLDS = 5
 
 
@@ -61,32 +61,16 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 kf = KFold(n_splits=NUMBER_FOLDS)
 
-for i in range(2):
+for i in range(1):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
     noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
+    noise_type = random.sample(NOISE_TYPE, 1)[0]
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
-    # increase the contract of pictures
-    # X_train_contrast = np.zeros(np.shape(X_train))
-    # for i in range(len(X_train_contrast)):
-    #     image = X_train[i, :]
-    #     image = image.astype(np.uint8)
-    #     X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
-    #
-    # X_test_contrast = np.zeros(np.shape(X_train))
-    # for i in range(len(X_test_contrast)):
-    #     image = X_train[i, :]
-    #     image = image.astype(np.uint8)
-    #     X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
-
-    # # normalize data
-    # X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-    # X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-    # X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
-    # X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
+    current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
     optimal_loss = float('inf')
     for train_index, test_index in kf.split(X_train_contrast):
@@ -107,20 +91,37 @@ for i in range(2):
         validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
 
         model = Model()
-        val_loss, ae = model.fit(noise_percentage,
-                                 batch_size,
-                                 hidden_layers,
-                                 train_dl_clean,
-                                 train_dl_noise,
-                                 validation_dl)
+        val_loss, train_loss, ae = model.fit(noise_percentage,
+                                             batch_size,
+                                             hidden_layers,
+                                             train_dl_clean,
+                                             train_dl_noise,
+                                             validation_dl)
         val_loss = np.array(val_loss)
+        train_loss = np.array(train_loss)
         current_validation_losses[:, column] = val_loss
+        current_training_losses[:, column] = train_loss
         column += 1
-        print("Finished first set of hyperparameters")
 
-    average_loss = current_validation_losses.mean(axis=1)
-    minimum_loss = average_loss.min()
-    epoch = average_loss.argmin()
+    average_validation_loss = current_validation_losses.mean(axis=1)
+    average_training_loss = current_training_losses.mean(axis=1)
+    minimum_loss = average_validation_loss.min()
+    epoch = average_validation_loss.argmin()+1
+
+    N = np.arange(1, EPOCHS_FINETUNING)
+    plt.style.use("ggplot")
+    plt.figure()
+    plt.plot(N, average_training_loss, label="train_loss")
+    plt.plot(N, average_validation_loss, label="val_loss")
+    plt.title("Training Loss and Accuracy")
+    plt.xlabel("Epoch #")
+    plt.ylabel("Loss/Accuracy")
+    plt.legend(loc="lower left")
+    plt.savefig(f"loss_graph"
+                f"_BATCH_SIZE_{str(batch_size)}"
+                f"_NOISE_TYPE_{noise_type}"
+                f"_NOISE_PERCENTAGE_{str(noise_percentage)}"
+                f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]")
 
     if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
@@ -132,15 +133,12 @@ X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
 final_model = Model()
-test_loss, autoencoder = final_model.fit(optimal_noise,
+test_loss, training, autoencoder = final_model.fit(optimal_noise,
                                          optimal_batch_size,
                                          optimal_hidden_layers,
                                          train_dl_clean,
                                          train_dl_noise,
                                          visualize)
-
-
-
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
@@ -163,3 +161,5 @@ for i, features in enumerate(visualize):
     ax.get_yaxis().set_visible(False)
     if i == 9:
         break
+
+plt.savefig('final_test_prediction')
