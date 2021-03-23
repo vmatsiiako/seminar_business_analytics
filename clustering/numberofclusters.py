@@ -15,7 +15,7 @@ df_scale = pd.DataFrame(X_scale, columns=df.columns)
 df_scale.head()
 
 sse = []
-k_list = range(1, 15)
+k_list = range(1, 26)
 for k in k_list:
     km = KMeans(n_clusters=k)
     km.fit(df_scale)
@@ -27,3 +27,4 @@ plt.plot(pd.DataFrame(sse)[0], pd.DataFrame(sse)[1], marker='o')
 plt.title('Optimal Number of Clusters using Elbow Method (Scaled Data)')
 plt.xlabel('Number of clusters')
 plt.ylabel('Inertia')
+plt.show()
