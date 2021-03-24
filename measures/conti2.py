@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import coranking
-from coranking.metrics import continuity
+from coranking.metrics import trustworthiness, continuity
 
 #https://coranking.readthedocs.io/en/latest/
 
@@ -12,19 +12,15 @@ df = pd.read_csv("../Data/sign_mnist_train.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
-# increase the contrast of pictures
+#contrast data
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
-    image = X_train[i, :]
+    image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
-
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
 # normalize data
-X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
-
-#features = df.columns[1:]
-#X = df.loc[:, features].values
+X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
+X_train = X_train.astype('float32') / 255.0 - 0.5
 
 #run PCA with n=... principal components
 pca = PCA(n_components=3)
