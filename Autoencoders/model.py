@@ -130,7 +130,7 @@ class Model(nn.Module):
                 optimizer.step()
                 epoch_loss += batch_loss
             train_loss.append(epoch_loss/len(train_dl_clean))
-            for j, features in enumerate(train_dl_clean):
+            for k, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 final_training_loss += batch_loss
             final_train_loss.append(final_training_loss/len(train_dl_clean))
