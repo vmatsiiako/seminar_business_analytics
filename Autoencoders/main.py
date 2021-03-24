@@ -2,8 +2,8 @@ import random
 
 import pandas as pd
 import numpy as np
-# import matplotlib
-# matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -26,8 +26,8 @@ PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
-EPOCHS_PRETRAINING = 2
-EPOCHS_FINETUNING = 2
+EPOCHS_PRETRAINING = 5
+EPOCHS_FINETUNING = 5
 NUMBER_FOLDS = 5
 
 
@@ -68,12 +68,16 @@ for i in range(2):
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
 
+    print("Starting CV" + i+1 + "with noise type" + noise_type + "[" + noise_parameter + "], batch size" + batch_size + "hidden layers" + ','.join([str(elem) for elem in hidden_layers]))
+
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
     optimal_loss = float('inf')
+    fold = 0
     for train_index, test_index in kf.split(X_train_contrast):
+        print("Starting Fold #" + fold+1)
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
         X_train_clean = torch.Tensor(X_train_CV)
@@ -106,6 +110,7 @@ for i in range(2):
         current_training_losses[:, column] = train_loss
         current_final_training_losses[:, column] = final_train
         column += 1
+        fold = fold + 1
 
     average_validation_loss = current_validation_losses.mean(axis=1)
     average_training_loss = current_training_losses.mean(axis=1)
