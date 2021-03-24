@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from sklearn.manifold import trustworthiness
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -31,7 +30,7 @@ princa = pca.fit_transform(X_contrast)
 #Q = coranking.coranking_matrix(high_data, low_data)
 Q = coranking.coranking_matrix(X_contrast, princa)
 
-trust_pca = trustworthiness(Q, min_k=10, max_k=20)
-cont_pca = continuity(Q, min_k=10, max_k=20)
+trust_pca = trustworthiness(Q, min_k=1, max_k=25)
+cont_pca = continuity(Q, min_k=1, max_k=25)
 print(trust_pca)
 print(cont_pca)
