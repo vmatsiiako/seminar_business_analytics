@@ -2,8 +2,8 @@ import random
 
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+# import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -26,8 +26,8 @@ PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
-EPOCHS_PRETRAINING = 5
-EPOCHS_FINETUNING = 5
+EPOCHS_PRETRAINING = 10
+EPOCHS_FINETUNING = 10
 NUMBER_FOLDS = 5
 
 
@@ -68,7 +68,7 @@ for i in range(2):
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
 
-    print("Starting CV" + i+1 + "with noise type" + noise_type + "[" + noise_parameter + "], batch size" + batch_size + "hidden layers" + ','.join([str(elem) for elem in hidden_layers]))
+    print("Starting CV " + str(i+1) + " with noise type " + noise_type + " [" + str(noise_parameter) + "], batch size " + str(batch_size) + " hidden layers " + ','.join([str(elem) for elem in hidden_layers]))
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     # current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
@@ -77,7 +77,7 @@ for i in range(2):
     optimal_loss = float('inf')
     fold = 0
     for train_index, test_index in kf.split(X_train_contrast):
-        print("Starting Fold #" + fold+1)
+        print("Starting Fold #" + str(fold+1))
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
         X_train_clean = torch.Tensor(X_train_CV)
@@ -96,13 +96,14 @@ for i in range(2):
 
         model = Model()
         val_loss, final_train, ae = model.fit(noise_parameter,
-                                                          batch_size,
-                                                          hidden_layers,
-                                                          train_dl_clean,
-                                                          train_dl_noise,
-                                                          validation_dl,
-                                                          noise_type,
-                                                          EPOCHS_FINETUNING)
+                                              batch_size,
+                                              hidden_layers,
+                                              train_dl_clean,
+                                              train_dl_noise,
+                                              validation_dl,
+                                              noise_type,
+                                              EPOCHS_FINETUNING,
+                                              EPOCHS_PRETRAINING)
         val_loss = np.array(val_loss)
         # train_loss = np.array(train_loss)
         final_train = np.array(final_train)
@@ -153,7 +154,8 @@ test_loss, training, test_train_loss, autoencoder = final_model.fit(optimal_nois
                                                    train_dl_noise,
                                                    visualize,
                                                    optimal_noise_type,
-                                                   optimal_epoch)
+                                                   optimal_epoch,
+                                                   EPOCHS_PRETRAINING)
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
