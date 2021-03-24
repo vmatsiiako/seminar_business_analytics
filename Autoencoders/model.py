@@ -129,7 +129,7 @@ class Model(nn.Module):
                 batch_loss.backward()
                 optimizer.step()
                 epoch_loss += batch_loss
-            train_loss.append(epoch_loss/len(train_dl_clean))
+            # train_loss.append(epoch_loss/len(train_dl_clean))
             for k, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 final_training_loss += batch_loss
@@ -140,5 +140,5 @@ class Model(nn.Module):
             val_loss.append(validation_epoch_loss/len(validation_dl))
         plt.show()
 
-        return val_loss, train_loss, final_train_loss, ae
+        return val_loss, final_train_loss, ae
 

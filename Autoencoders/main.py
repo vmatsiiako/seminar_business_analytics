@@ -2,8 +2,8 @@ import random
 
 import pandas as pd
 import numpy as np
-# import matplotlib
-# matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -71,7 +71,7 @@ for i in range(2):
     print("Starting CV" + i+1 + "with noise type" + noise_type + "[" + noise_parameter + "], batch size" + batch_size + "hidden layers" + ','.join([str(elem) for elem in hidden_layers]))
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
-    current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
+    # current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
     optimal_loss = float('inf')
@@ -95,7 +95,7 @@ for i in range(2):
         validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
 
         model = Model()
-        val_loss, train_loss, final_train, ae = model.fit(noise_parameter,
+        val_loss, final_train, ae = model.fit(noise_parameter,
                                                           batch_size,
                                                           hidden_layers,
                                                           train_dl_clean,
@@ -104,16 +104,16 @@ for i in range(2):
                                                           noise_type,
                                                           EPOCHS_FINETUNING)
         val_loss = np.array(val_loss)
-        train_loss = np.array(train_loss)
+        # train_loss = np.array(train_loss)
         final_train = np.array(final_train)
         current_validation_losses[:, column] = val_loss
-        current_training_losses[:, column] = train_loss
+        # current_training_losses[:, column] = train_loss
         current_final_training_losses[:, column] = final_train
         column += 1
         fold = fold + 1
 
     average_validation_loss = current_validation_losses.mean(axis=1)
-    average_training_loss = current_training_losses.mean(axis=1)
+    # average_training_loss = current_training_losses.mean(axis=1)
     average_final = current_final_training_losses.mean(axis=1)
     minimum_loss = average_validation_loss.min()
     epoch = average_validation_loss.argmin()+1
@@ -121,7 +121,7 @@ for i in range(2):
     N = np.arange(0, EPOCHS_FINETUNING)
     plt.style.use("ggplot")
     plt.figure()
-    plt.plot(N, average_training_loss, label="train_loss")
+    # plt.plot(N, average_training_loss, label="train_loss")
     plt.plot(N, average_validation_loss, label="val_loss")
     plt.plot(N, average_final, label="final_train_loss")
     plt.title("Training Loss and Accuracy")
