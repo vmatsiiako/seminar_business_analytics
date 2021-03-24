@@ -143,6 +143,11 @@ for i in range(2):
         optimal_hidden_layers = hidden_layers
         optimal_epoch = epoch
 
+print("The optimal model is " + " with noise type " + optimal_noise_type +
+      " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
+      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) +
+      " epoch " + optimal_epoch + " loss " + optimal_loss)
+
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
