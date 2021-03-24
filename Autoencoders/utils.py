@@ -1,17 +1,18 @@
 import numpy as np
+import matplotlib as plt
 
 
-def add_noise(img, noise_type, percentage=None, sigma=None):
+def add_noise(img, noise_type, parameter=None):
     img = img.astype(np.float32)
 
     if noise_type == "gaussian":
         mean = 0
-        noise = np.random.normal(mean, sigma, img.shape)
+        noise = np.random.normal(mean, parameter, img.shape)
         img = img + noise
         return img
 
     if noise_type == "zeros":
-        noise = np.random.choice([0, 1], size=(img.shape), p=[percentage, 1 - percentage])
+        noise = np.random.choice([0, 1], size=(img.shape), p=[parameter, 1 - parameter])
         img = img * noise
         return img
 
