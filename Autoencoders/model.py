@@ -23,8 +23,8 @@ class Model(nn.Module):
               NOISE_TYPE,
               EPOCHS_FINETUNING,
               EPOCHS_PRETRAINING,
-              NUMBER_OF_PIXELS=784,
-              GAUSSIAN_ST_DEV=None):
+              LEARNING_RATE,
+              NUMBER_OF_PIXELS=784):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -76,7 +76,7 @@ class Model(nn.Module):
 
         # fine-tune autoencoder
         ae = DAE(models)
-        optimizer = torch.optim.Adam(ae.parameters(), 1e-3)
+        optimizer = torch.optim.Adam(ae.parameters(), lr=LEARNING_RATE)
         loss = nn.MSELoss()
 
         val_loss = []

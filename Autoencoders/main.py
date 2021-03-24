@@ -6,13 +6,8 @@ import numpy as np
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
 import cv2
-from sklearn.model_selection import GridSearchCV
 from torch.utils.data import DataLoader, TensorDataset
-from tqdm import tqdm
-from Autoencoders.DAE import DAE
-from Autoencoders.d_DAE import d_DAE
 from Autoencoders.utils import add_noise
 from Autoencoders.model import Model
 from sklearn.model_selection import KFold
@@ -26,8 +21,9 @@ PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
-EPOCHS_PRETRAINING = 10
-EPOCHS_FINETUNING = 10
+LEARNING_RATE = [0.01]
+EPOCHS_PRETRAINING = 2
+EPOCHS_FINETUNING = 2
 NUMBER_FOLDS = 5
 
 
@@ -67,17 +63,16 @@ for i in range(2):
     noise_parameter = random.sample(NOISE[noise_type], 1)[0]
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
+    learning_rate = random.sample(LEARNING_RATE, 1)[0]
 
     print("Starting CV " + str(i+1) + " with noise type " + noise_type + " [" + str(noise_parameter) + "], batch size " + str(batch_size) + " hidden layers " + ','.join([str(elem) for elem in hidden_layers]))
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
-    # current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
     optimal_loss = float('inf')
-    fold = 0
     for train_index, test_index in kf.split(X_train_contrast):
-        print("Starting Fold #" + str(fold+1))
+        print("Starting Fold #" + str(column+1))
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
         X_train_clean = torch.Tensor(X_train_CV)
@@ -103,18 +98,15 @@ for i in range(2):
                                               validation_dl,
                                               noise_type,
                                               EPOCHS_FINETUNING,
-                                              EPOCHS_PRETRAINING)
+                                              EPOCHS_PRETRAINING,
+                                              learning_rate)
         val_loss = np.array(val_loss)
-        # train_loss = np.array(train_loss)
         final_train = np.array(final_train)
         current_validation_losses[:, column] = val_loss
-        # current_training_losses[:, column] = train_loss
         current_final_training_losses[:, column] = final_train
         column += 1
-        fold = fold + 1
 
     average_validation_loss = current_validation_losses.mean(axis=1)
-    # average_training_loss = current_training_losses.mean(axis=1)
     average_final = current_final_training_losses.mean(axis=1)
     minimum_loss = average_validation_loss.min()
     epoch = average_validation_loss.argmin()+1
@@ -122,7 +114,6 @@ for i in range(2):
     N = np.arange(0, EPOCHS_FINETUNING)
     plt.style.use("ggplot")
     plt.figure()
-    # plt.plot(N, average_training_loss, label="train_loss")
     plt.plot(N, average_validation_loss, label="val_loss")
     plt.plot(N, average_final, label="final_train_loss")
     plt.title("Training Loss and Accuracy")
@@ -133,7 +124,8 @@ for i in range(2):
                 f"_BATCH_SIZE_{str(batch_size)}"
                 f"_NOISE_TYPE_{noise_type}"
                 f"_NOISE_PERCENTAGE_{str(noise_parameter).replace('.', ',')}"
-                f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]")
+                f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]"
+                f"_LEATNING_RATE_{str(learning_rate).replace('.', ',')}")
 
     if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
@@ -142,10 +134,11 @@ for i in range(2):
         optimal_batch_size = batch_size
         optimal_hidden_layers = hidden_layers
         optimal_epoch = epoch
+        optimal_learning_rate = learning_rate
 
 print("The optimal model is " + " with noise type " + optimal_noise_type +
       " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
-      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) +
+      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + optimal_learning_rate +
       " epoch " + optimal_epoch + " loss " + optimal_loss)
 
 X_test_contrast = torch.Tensor(X_test_contrast)
@@ -160,7 +153,8 @@ test_loss, training, test_train_loss, autoencoder = final_model.fit(optimal_nois
                                                    visualize,
                                                    optimal_noise_type,
                                                    optimal_epoch,
-                                                   EPOCHS_PRETRAINING)
+                                                   EPOCHS_PRETRAINING,
+                                                   optimal_learning_rate)
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
