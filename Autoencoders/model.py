@@ -1,17 +1,12 @@
 import numpy as np
-# import datetime.datetime as dt
-# import matplotlib
-# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-import cv2
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 from Autoencoders.DAE import DAE
 from Autoencoders.d_DAE import d_DAE
 from Autoencoders.utils import add_noise
-from torch.utils.tensorboard import SummaryWriter
 
 
 class Model(nn.Module):
@@ -83,40 +78,9 @@ class Model(nn.Module):
         ae = DAE(models)
         optimizer = torch.optim.Adam(ae.parameters(), 1e-3)
         loss = nn.MSELoss()
-        # writer_train = SummaryWriter(f"./autoencoders_check_1_train"
-        #                              f"_BATCH_SIZE_{str(BATCH_SIZE)}"
-        #                              f"_NOISE_TYPE_{NOISE_TYPE}"
-        #                              f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-        #                              f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-        #                              #f"_TIME_{dt.now()}"
-        #                              )
-        # writer_validation = SummaryWriter(f"./autoencoders_check_1_validation"
-        #                                   f"_BATCH_SIZE_{str(BATCH_SIZE)}"
-        #                                   f"_NOISE_TYPE_{NOISE_TYPE}"
-        #                                   f"_NOISE_PERCENTAGE_{str(NOISE_PERCENTAGE)}"
-        #                                   f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in HIDDEN_LAYERS])}]"
-        #                                   #f"_TIME_{dt.now()}"
-        #                                   )
+
         val_loss = []
-        train_loss = []
         final_train_loss = []
-        # for epoch in range(EPOCHS_FINETUNING):
-        #     print("Fine-tuning Epoch #" + str(epoch))
-        #     epoch_loss = 0
-        #     validation_epoch_loss = 0
-        #     for j, features in enumerate(validation_dl):
-        #         batch_loss = loss(features[0], ae(features[0]))
-        #         validation_epoch_loss += batch_loss
-        #     val_loss.append(validation_epoch_loss/len(validation_dl))
-        #     # writer_validation.add_scalar("Loss", validation_epoch_loss/len(validation_dl), epoch)
-        #     for i, features in enumerate(train_dl_clean):
-        #         batch_loss = loss(features[0], ae(features[0]))
-        #         optimizer.zero_grad()
-        #         batch_loss.backward()
-        #         optimizer.step()
-        #         epoch_loss += batch_loss
-        #     train_loss.append(epoch_loss/len(train_dl_clean))
-        #     # writer_train.add_scalar("Loss", epoch_loss/len(train_dl_clean), epoch)
 
         for epoch in range(EPOCHS_FINETUNING):
             print("Fine-tuning Epoch #" + str(epoch))
@@ -129,7 +93,6 @@ class Model(nn.Module):
                 batch_loss.backward()
                 optimizer.step()
                 epoch_loss += batch_loss
-            # train_loss.append(epoch_loss/len(train_dl_clean))
             for k, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 final_training_loss += batch_loss
