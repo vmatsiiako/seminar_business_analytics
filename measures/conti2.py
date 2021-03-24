@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from sklearn.manifold import trustworthiness
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -18,12 +19,13 @@ for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
     X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+
 # normalize data
 X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
 X_train = X_train.astype('float32') / 255.0 - 0.5
 
-#run PCA with n=... principal components
-pca = PCA(n_components=3)
+#run PCA with n=13 principal components
+pca = PCA(n_components=13)
 princa = pca.fit_transform(X_contrast)
 
 #Q = coranking.coranking_matrix(high_data, low_data)
