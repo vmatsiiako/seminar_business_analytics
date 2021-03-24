@@ -49,9 +49,12 @@ plt.show()
 
 pca = PCA(n_components=3)
 principalComponents = pca.fit_transform(X_contrast)
+
 principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2', 'pc3'])
 
 finalDf = pd.concat([principalDf, df[['label']]], axis=1)
+
+#this line creates a csv file of the low-dimensional representation
 #finalDf.to_csv('results.csv', index=False, header=False)
 
 fig = plt.figure()

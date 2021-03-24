@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import distance
 from trustcont import *
 
+#https://github.com/isido/dimred/blob/master/dimred/trustcont.py
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 
 features = df.columns[1:]
@@ -15,7 +16,7 @@ x = df.loc[:, features].values
 x = StandardScaler().fit_transform(x)
 princa = pca.fit_transform(x)
 
-ks = vector_row = np.array([10])
+ks = vector_row = np.array([1])
 
 cont = continuity(x, princa, ks)
 print(cont)

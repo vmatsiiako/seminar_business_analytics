@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import cv2
 
+#https://scikit-learn.org/stable/modules/generated/sklearn.manifold.trustworthiness.html
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 
 features = df.columns[1:]

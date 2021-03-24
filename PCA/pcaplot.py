@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-
+#https://github.com/mGalarnyk/Python_Tutorials/blob/master/Sklearn/PCA/PCA_Image_Reconstruction_and_such.ipynb
 features = df.columns[1:]
 x = df.loc[:, features].values
 y = df.loc[:,['label']].values
