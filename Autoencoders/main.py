@@ -24,9 +24,7 @@ MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
-NOISE_TYPE = ['zeros', 'gaussian']
-NOISE_PERCENTAGE = [0, 0.1, 0.2, 0.3, 0.4]  #set it to "None" to impose gaussian noise
-SIGMA = [0.5, 1]
+NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
 EPOCHS_PRETRAINING = 2
@@ -65,8 +63,9 @@ kf = KFold(n_splits=NUMBER_FOLDS)
 for i in range(2):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
-    noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
-    noise_type = random.sample(NOISE_TYPE, 1)[0]
+    # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
+    noise_type = random.sample(NOISE.keys(), 1)[0]
+    noise_parameter = random.sample(NOISE[noise_type], 1)[0]
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
 
@@ -82,7 +81,7 @@ for i in range(2):
         X_validation_clean = torch.Tensor(X_validation_CV)
         X_train_noise = np.zeros(np.shape(X_train_CV))
         for i in range(len(X_train_CV)):
-            X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=noise_type, percentage=noise_percentage)
+            X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=noise_type, parameter=noise_parameter)
         X_train_noise = torch.Tensor(X_train_noise)
 
         train_ds_clean = TensorDataset(X_train_clean)
@@ -93,14 +92,14 @@ for i in range(2):
         validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
 
         model = Model()
-        val_loss, train_loss, final_train, ae = model.fit(noise_percentage,
-                                             batch_size,
-                                             hidden_layers,
-                                             train_dl_clean,
-                                             train_dl_noise,
-                                             validation_dl,
-                                             noise_type,
-                                             EPOCHS_FINETUNING)
+        val_loss, train_loss, final_train, ae = model.fit(noise_parameter,
+                                                          batch_size,
+                                                          hidden_layers,
+                                                          train_dl_clean,
+                                                          train_dl_noise,
+                                                          validation_dl,
+                                                          noise_type,
+                                                          EPOCHS_FINETUNING)
         val_loss = np.array(val_loss)
         train_loss = np.array(train_loss)
         final_train = np.array(final_train)
@@ -128,12 +127,12 @@ for i in range(2):
     plt.savefig(f"loss_graph"
                 f"_BATCH_SIZE_{str(batch_size)}"
                 f"_NOISE_TYPE_{noise_type}"
-                f"_NOISE_PERCENTAGE_{str(noise_percentage).replace('.', ',')}"
+                f"_NOISE_PERCENTAGE_{str(noise_parameter).replace('.', ',')}"
                 f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]")
 
     if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
-        optimal_noise = noise_percentage
+        optimal_noise = noise_parameter
         optimal_noise_type = noise_type
         optimal_batch_size = batch_size
         optimal_hidden_layers = hidden_layers
