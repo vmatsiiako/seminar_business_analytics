@@ -27,9 +27,9 @@ class Model(nn.Module):
               validation_dl,
               NOISE_TYPE,
               EPOCHS_FINETUNING,
+              EPOCHS_PRETRAINING,
               NUMBER_OF_PIXELS=784,
-              GAUSSIAN_ST_DEV=None,
-              EPOCHS_PRETRAINING=2):
+              GAUSSIAN_ST_DEV=None):
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
