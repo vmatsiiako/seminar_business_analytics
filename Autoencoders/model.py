@@ -99,6 +99,7 @@ class Model(nn.Module):
         #                                   )
         val_loss = []
         train_loss = []
+        final_train_loss = []
         # for epoch in range(EPOCHS_FINETUNING):
         #     print("Fine-tuning Epoch #" + str(epoch))
         #     epoch_loss = 0
@@ -121,6 +122,7 @@ class Model(nn.Module):
             print("Fine-tuning Epoch #" + str(epoch))
             epoch_loss = 0
             validation_epoch_loss = 0
+            final_training_loss = 0
             for i, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 optimizer.zero_grad()
@@ -128,11 +130,15 @@ class Model(nn.Module):
                 optimizer.step()
                 epoch_loss += batch_loss
             train_loss.append(epoch_loss/len(train_dl_clean))
+            for j, features in enumerate(train_dl_clean):
+                batch_loss = loss(features[0], ae(features[0]))
+                final_training_loss += batch_loss
+            final_train_loss.append(final_training_loss/len(train_dl_clean))
             for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
                 validation_epoch_loss += batch_loss
             val_loss.append(validation_epoch_loss/len(validation_dl))
         plt.show()
 
-        return val_loss, train_loss, ae
+        return val_loss, train_loss, final_train_loss, ae
 

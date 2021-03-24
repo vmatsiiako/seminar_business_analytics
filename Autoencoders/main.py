@@ -26,6 +26,7 @@ PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
 NOISE_TYPE = ['zeros', 'gaussian']
 NOISE_PERCENTAGE = [0, 0.1, 0.2, 0.3, 0.4]  #set it to "None" to impose gaussian noise
+SIGMA = [0.5, 1]
 GAUSSIAN_ST_DEV = None   #set it to "None" to impose zero noise
 HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
 EPOCHS_PRETRAINING = 2
@@ -71,6 +72,7 @@ for i in range(2):
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     current_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
+    current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
     optimal_loss = float('inf')
     for train_index, test_index in kf.split(X_train_contrast):
@@ -91,7 +93,7 @@ for i in range(2):
         validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
 
         model = Model()
-        val_loss, train_loss, ae = model.fit(noise_percentage,
+        val_loss, train_loss, final_train, ae = model.fit(noise_percentage,
                                              batch_size,
                                              hidden_layers,
                                              train_dl_clean,
@@ -101,12 +103,15 @@ for i in range(2):
                                              EPOCHS_FINETUNING)
         val_loss = np.array(val_loss)
         train_loss = np.array(train_loss)
+        final_train = np.array(final_train)
         current_validation_losses[:, column] = val_loss
         current_training_losses[:, column] = train_loss
+        current_final_training_losses[:, column] = final_train
         column += 1
 
     average_validation_loss = current_validation_losses.mean(axis=1)
     average_training_loss = current_training_losses.mean(axis=1)
+    average_final = current_final_training_losses.mean(axis=1)
     minimum_loss = average_validation_loss.min()
     epoch = average_validation_loss.argmin()+1
 
@@ -115,6 +120,7 @@ for i in range(2):
     plt.figure()
     plt.plot(N, average_training_loss, label="train_loss")
     plt.plot(N, average_validation_loss, label="val_loss")
+    plt.plot(N, average_final, label="final_train_loss")
     plt.title("Training Loss and Accuracy")
     plt.xlabel("Epoch #")
     plt.ylabel("Loss/Accuracy")
@@ -137,7 +143,7 @@ X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
 final_model = Model()
-test_loss, training, autoencoder = final_model.fit(optimal_noise,
+test_loss, training, test_train_loss, autoencoder = final_model.fit(optimal_noise,
                                                    optimal_batch_size,
                                                    optimal_hidden_layers,
                                                    train_dl_clean,
