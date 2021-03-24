@@ -19,7 +19,7 @@ class Model(nn.Module):
         super(Model, self).__init__()
 
     def fit(self,
-              NOISE_PERCENTAGE,
+              NOISE_PARAMETER,
               BATCH_SIZE,
               HIDDEN_LAYERS,
               train_dl_clean,
@@ -72,7 +72,7 @@ class Model(nn.Module):
             new_data_corrupted = np.zeros(np.shape(new_data))
 
             for i in range(len(new_data)):
-                new_data_corrupted[i] = add_noise(new_data[i, :], noise_type=NOISE_TYPE, percentage=NOISE_PERCENTAGE)
+                new_data_corrupted[i] = add_noise(new_data[i, :], noise_type=NOISE_TYPE, parameter=NOISE_PARAMETER)
             new_data_corrupted = torch.Tensor(new_data_corrupted)
             dae_train_dl_clean = DataLoader(TensorDataset(torch.Tensor(new_data)), batch_size=BATCH_SIZE, shuffle=False)
             dae_train_dl_corrupted = DataLoader(TensorDataset(torch.Tensor(new_data_corrupted)), batch_size=BATCH_SIZE,
