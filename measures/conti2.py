@@ -32,7 +32,7 @@ princa = pca.fit_transform(X_contrast)
 #pick random subsample to calculate the measures for
 new_data = np.hstack((X_contrast, princa))
 number_of_rows = new_data.shape[0]
-random_indices = np.random.choice(number_of_rows, size=10000, replace=False)
+random_indices = np.random.choice(number_of_rows, size=15000, replace=False)
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
