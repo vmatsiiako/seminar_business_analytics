@@ -101,7 +101,7 @@ class Model(nn.Module):
                 batch_loss = loss(features[0], ae(features[0]))
                 validation_epoch_loss += batch_loss
             val_loss.append(validation_epoch_loss/len(validation_dl))
-        plt.show()
+        # plt.show()
 
         return val_loss, final_train_loss, ae
 

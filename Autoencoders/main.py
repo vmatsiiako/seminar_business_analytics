@@ -20,10 +20,10 @@ NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 BATCH_SIZE = [16, 32, 64, 8]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
-HIDDEN_LAYERS = [[500, 250, 100, 5], [500, 250, 5], [1000, 500, 250, 5], [1000, 500, 250, 100, 5]]
-LEARNING_RATE = [0.01]
-EPOCHS_PRETRAINING = 10
-EPOCHS_FINETUNING = 10
+HIDDEN_LAYERS = [[500, 250, 100, 13], [500, 250, 13], [1000, 500, 250, 13], [1000, 500, 250, 100, 13]]
+LEARNING_RATE = [0.01, 0.02]
+EPOCHS_PRETRAINING = 30
+EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 
 
@@ -55,7 +55,7 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 kf = KFold(n_splits=NUMBER_FOLDS)
 
-for i in range(2):
+for i in range(5):
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
     # batch_size = random.sample(BATCH_SIZE, 1),
     # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
@@ -65,7 +65,7 @@ for i in range(2):
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
     learning_rate = random.sample(LEARNING_RATE, 1)[0]
 
-    print("Starting CV " + str(i+1) + " with noise type " + noise_type + " [" + str(noise_parameter) + "], batch size " + str(batch_size) + " hidden layers " + ','.join([str(elem) for elem in hidden_layers]))
+    print("Starting CV " + str(i+1) + " with noise type " + noise_type + " [" + str(noise_parameter) + "], batch size " + str(batch_size) + " hidden layers " + ','.join([str(elem) for elem in hidden_layers]) + " lr " + str(learning_rate) )
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
@@ -138,8 +138,8 @@ for i in range(2):
 
 print("The optimal model is " + " with noise type " + optimal_noise_type +
       " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
-      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + optimal_learning_rate +
-      " epoch " + optimal_epoch + " loss " + optimal_loss)
+      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate) +
+      " epoch " + str(optimal_epoch) + " loss " + str(optimal_loss))
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
@@ -178,4 +178,7 @@ for i, features in enumerate(visualize):
     if i == 9:
         break
 
-plt.savefig('final_test_prediction')
+plt.savefig("final_test_prediction" + " with noise type " + optimal_noise_type +
+          " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
+          " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate) +
+          " epoch " + str(optimal_epoch) + " loss " + str(optimal_loss))
