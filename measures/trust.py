@@ -26,7 +26,7 @@ princa = pca.fit_transform(x)
 trust_array = []
 for i in range(1,26):
     trust = trustworthiness(X_contrast, princa, n_neighbors = i)
-    trust_array[i] = trust
+    trust_array[i - 1] = trust
 
 #trust = trustworthiness(X_contrast, princa, n_neighbors=10)
 #print(trust)
