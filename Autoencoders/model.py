@@ -19,11 +19,21 @@ class Model(nn.Module):
               train_dl_clean,
               train_dl_noise,
               validation_dl,
+              # X_train_clean,
+              # X_train_noise,
+              # X_validation_clean,
               NOISE_TYPE,
               EPOCHS_FINETUNING,
               EPOCHS_PRETRAINING,
               LEARNING_RATE,
               NUMBER_OF_PIXELS=784):
+
+        # train_ds_clean = TensorDataset(X_train_clean)
+        # train_ds_noise = TensorDataset(X_train_noise)
+        # validation_ds = TensorDataset(X_validation_clean)
+        # train_dl_clean = DataLoader(train_ds_clean, batch_size=BATCH_SIZE, shuffle=False)
+        # train_dl_noise = DataLoader(train_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
+        # validation_dl = DataLoader(validation_ds, batch_size=BATCH_SIZE, shuffle=False)
         models = []
         visible_dim = NUMBER_OF_PIXELS
         dae_train_dl_clean = train_dl_clean
@@ -36,20 +46,21 @@ class Model(nn.Module):
             optimizer = torch.optim.Adam(dae.parameters(), lr=0.01, weight_decay=1e-5)
 
             l = len(dae_train_dl_clean)
-            losslist = list()
+            # losslist = list()
             epoch_loss = 0
             running_loss = 0
-            dataset_previous_layer_batched = []
-            for i, features in tqdm(enumerate(dae_train_dl_clean)):
-                dataset_previous_layer_batched.append(features[0])
+            # dataset_previous_layer_batched = []
+            # for i, features in tqdm(enumerate(dae_train_dl_clean)):
+            #     dataset_previous_layer_batched.append(features[0])
 
             for epoch in range(EPOCHS_PRETRAINING):
-
+                dataloader_iterator = iter(dae_train_dl_clean)
                 print("Pretraining Epoch #", epoch)
                 for i, features in tqdm(enumerate(dae_train_dl_corrupted)):
                     # -----------------Forward Pass----------------------
                     output = dae(features[0])
-                    loss = criterion(output, dataset_previous_layer_batched[i])
+                    # loss = criterion(output, dataset_previous_layer_batched[i])
+                    loss = criterion(output, next(dataloader_iterator)[0])
                     # -----------------Backward Pass---------------------
                     optimizer.zero_grad()
                     loss.backward()
@@ -58,7 +69,7 @@ class Model(nn.Module):
                     running_loss += loss.item()
                     epoch_loss += loss.item()
                     # -----------------Log-------------------------------
-            losslist.append(running_loss / l)
+            # losslist.append(running_loss / l)
 
             models.append(dae)
             # rederive new data loader based on hidden activations of trained model
@@ -78,11 +89,12 @@ class Model(nn.Module):
         optimizer = torch.optim.Adam(ae.parameters(), lr=LEARNING_RATE)
         loss = nn.MSELoss()
 
-        val_loss = []
-        final_train_loss = []
+        val_loss = np.zeros((EPOCHS_FINETUNING))
+        final_train_loss = np.zeros((EPOCHS_FINETUNING))
+        # final_train_loss = []
 
         for epoch in range(EPOCHS_FINETUNING):
-            print("Fine-tuning Epoch #" + str(epoch))
+            print(f"Fine_tuning_Epoch{str(epoch)}")
             epoch_loss = 0
             validation_epoch_loss = 0
             final_training_loss = 0
@@ -95,11 +107,11 @@ class Model(nn.Module):
             for k, features in enumerate(train_dl_clean):
                 batch_loss = loss(features[0], ae(features[0]))
                 final_training_loss += batch_loss
-            final_train_loss.append(final_training_loss/len(train_dl_clean))
+            final_train_loss[epoch] = final_training_loss/len(train_dl_clean)
             for j, features in enumerate(validation_dl):
                 batch_loss = loss(features[0], ae(features[0]))
                 validation_epoch_loss += batch_loss
-            val_loss.append(validation_epoch_loss/len(validation_dl))
+            val_loss[epoch] = validation_epoch_loss/len(validation_dl)
         # plt.show()
 
         return val_loss, final_train_loss, ae

@@ -4,6 +4,15 @@ import matplotlib as plt
 
 def add_noise(img, noise_type, parameter=None):
     img = img.astype(np.float32)
+    # dataset = tensor_data.detach().numpy()
+    # dataset_corrupted = np.zeros(dataset.shape)
+    # if noise_type == "gaussian":
+    #     mean = 0
+    #     for i in range(len(dataset)):
+    #         noise = np.random.normal(mean, parameter, dataset_corrupted.shape[1])
+    #         dataset_corrupted[i] = dataset[i,:]+noise
+    #     return dataset_corrupted
+    # X_train_noise = torch.Tensor(X_train_noise)
 
     if noise_type == "gaussian":
         mean = 0

@@ -19,10 +19,10 @@ MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 BATCH_SIZE = [32, 64]
-NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
+NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6], 'gaussian': [0, 0.5, 1, 2]}
 HIDDEN_LAYERS = [[500, 250, 100, 13], [500, 250, 13], [1000, 500, 250, 13]]
 LEARNING_RATE = [0.01, 0.02]
-EPOCHS_PRETRAINING = 30
+EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 
@@ -57,7 +57,15 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 kf = KFold(n_splits=NUMBER_FOLDS)
 
-for i in range(3):
+optimal_loss = 0
+optimal_noise = None
+optimal_noise_type = None
+optimal_batch_size = None
+optimal_hidden_layers = None
+optimal_epoch = None
+optimal_learning_rate = None
+
+for i in range(6):
     noise_type = random.sample(NOISE.keys(), 1)[0]
     noise_parameter = random.sample(NOISE[noise_type], 1)[0]
     batch_size = random.sample(BATCH_SIZE, 1)[0]
@@ -73,9 +81,9 @@ for i in range(3):
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
     column = 0
-    optimal_loss = float('inf')
+
     for train_index, test_index in kf.split(X_train_contrast):
-        print("Starting Fold #" + str(column+1))
+        print(f"Starting_Fold_{str(column+1)}")
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
         # Convert the data to torch types
         X_train_clean = torch.Tensor(X_train_CV)
@@ -88,12 +96,13 @@ for i in range(3):
         train_ds_clean = TensorDataset(X_train_clean)
         train_ds_noise = TensorDataset(X_train_noise)
         validation_ds = TensorDataset(X_validation_clean)
-        # train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
-        # train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
-        # validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
-        train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=True)
-        train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=True)
-        validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=True)
+        train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
+        train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
+        validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
+
+        # train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=True)
+        # train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=True)
+        # validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=True)
 
         model = Model()
         val_loss, final_train, ae = model.fit(noise_parameter,
@@ -102,12 +111,15 @@ for i in range(3):
                                               train_dl_clean,
                                               train_dl_noise,
                                               validation_dl,
+                                              # X_train_clean,
+                                              # X_train_noise,
+                                              # X_validation_clean,
                                               noise_type,
                                               EPOCHS_FINETUNING,
                                               EPOCHS_PRETRAINING,
                                               learning_rate)
-        val_loss = np.array(val_loss)
-        final_train = np.array(final_train)
+        # val_loss = np.array(val_loss)
+        # final_train = np.array(final_train)
         current_validation_losses[:, column] = val_loss
         current_final_training_losses[:, column] = final_train
         column += 1
@@ -142,16 +154,45 @@ for i in range(3):
         optimal_epoch = epoch
         optimal_learning_rate = learning_rate
 
-print("The optimal model is " + " with noise type " + optimal_noise_type +
-      " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
-      " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate) +
-      " epoch " + str(optimal_epoch) + " loss " + str(optimal_loss))
+print(f"Optimal_model_is"
+      f"_BATCH_SIZE_{str(optimal_batch_size)}"
+      f"_NOISE_TYPE_{optimal_noise_type}"
+      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+      f"_EPOCH_{str(optimal_epoch)}"
+      f"_LOSS_{str(optimal_loss).replace('.', ',')}")
+
+# print("The optimal model is " + " with noise type " + optimal_noise_type +
+#       " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
+#       " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate) +
+#       " epoch " + str(optimal_epoch) + " loss " + str(optimal_loss))
+
+# X_train_noise = np.zeros(np.shape(X_train_CV))
+# for i in range(len(X_train_CV)):
+#     X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=noise_type, parameter=noise_parameter)
+# X_train_noise = torch.Tensor(X_train_noise)
+
+# train_ds_clean = TensorDataset(X_train_clean)
+# train_ds_noise = TensorDataset(X_train_noise)
+# validation_ds = TensorDataset(X_validation_clean)
+
+X_train_contrast_noise = np.zeros(np.shape(X_train_contrast))
+for i in range(len(X_train_contrast)):
+    X_train_contrast_noise[i] = add_noise(X_train_contrast[i, :], noise_type=optimal_noise_type, parameter=optimal_noise)
+X_train_contrast_noise = torch.Tensor(X_train_contrast_noise)
+X_train_contrast = torch.Tensor(X_train_contrast)
+train_ds_clean = TensorDataset(X_train_contrast)
+train_ds_noise = TensorDataset(X_train_contrast_noise)
+
+train_dl_clean = DataLoader(train_ds_clean, batch_size=optimal_batch_size, shuffle=False)
+train_dl_noise = DataLoader(train_ds_noise, batch_size=optimal_batch_size, shuffle=False)
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
 final_model = Model()
-test_loss, training, test_train_loss, autoencoder = final_model.fit(optimal_noise,
+test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
                                                    optimal_batch_size,
                                                    optimal_hidden_layers,
                                                    train_dl_clean,
@@ -162,9 +203,7 @@ test_loss, training, test_train_loss, autoencoder = final_model.fit(optimal_nois
                                                    EPOCHS_PRETRAINING,
                                                    optimal_learning_rate)
 
-X_test_contrast = torch.Tensor(X_test_contrast)
-test_ds = TensorDataset(X_test_contrast)
-visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
+
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
 for i, features in enumerate(visualize):
