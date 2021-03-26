@@ -49,6 +49,6 @@ print('Completeness Score Full Dataset: {}'.format(completeness_score(y_train, l
 print('V-score Score Full Dataset: {}'.format(v_measure_score(y_train, labels)))
 
 #Print Scores PCA data
-print('Homogeneity Score Full Dataset: {}'.format(homogeneity_score(y_train, labels_pca)))
-print('Completeness Score Full Dataset: {}'.format(completeness_score(y_train, labels_pca)))
-print('V-score Score Full Dataset: {}'.format(v_measure_score(y_train, labels_pca)))
+print('Homogeneity Score PCA: {}'.format(homogeneity_score(y_train, labels_pca)))
+print('Completeness Score PCA: {}'.format(completeness_score(y_train, labels_pca)))
+print('V-score Score PCA: {}'.format(v_measure_score(y_train, labels_pca)))
