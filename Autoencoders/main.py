@@ -18,9 +18,9 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-BATCH_SIZE = [16, 32, 64, 8]
+BATCH_SIZE = [32, 64]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.4], 'gaussian': [0, 0.5, 1]}
-HIDDEN_LAYERS = [[500, 250, 100, 13], [500, 250, 13], [1000, 500, 250, 13], [1000, 500, 250, 100, 13]]
+HIDDEN_LAYERS = [[500, 250, 100, 13], [500, 250, 13], [1000, 500, 250, 13]]
 LEARNING_RATE = [0.01, 0.02]
 EPOCHS_PRETRAINING = 30
 EPOCHS_FINETUNING = 50
@@ -34,6 +34,8 @@ X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 X_test = df_test.iloc[:,1:].values 
 y_test = df_test.iloc[:,0].values
+del df  #delete dataframe to reduce usage of memory
+del df_test #delete dataframe to reduce usage of memory
 
 X_train_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_train_contrast)):
@@ -55,17 +57,18 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 kf = KFold(n_splits=NUMBER_FOLDS)
 
-for i in range(5):
-    # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0],
-    # batch_size = random.sample(BATCH_SIZE, 1),
-    # noise_percentage = random.sample(NOISE_PERCENTAGE, 1)[0]
+for i in range(3):
     noise_type = random.sample(NOISE.keys(), 1)[0]
     noise_parameter = random.sample(NOISE[noise_type], 1)[0]
     batch_size = random.sample(BATCH_SIZE, 1)[0]
     hidden_layers = random.sample(HIDDEN_LAYERS, 1)[0]
     learning_rate = random.sample(LEARNING_RATE, 1)[0]
-
-    print("Starting CV " + str(i+1) + " with noise type " + noise_type + " [" + str(noise_parameter) + "], batch size " + str(batch_size) + " hidden layers " + ','.join([str(elem) for elem in hidden_layers]) + " lr " + str(learning_rate) )
+    print(f"Starting_CV_{str(i+1)}"
+          f"_BATCH_SIZE_{str(batch_size)}"
+          f"_NOISE_TYPE_{noise_type}"
+          f"_NOISE_PERCENTAGE_{str(noise_parameter).replace('.', ',')}"
+          f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]"
+          f"_LEATNING_RATE_{str(learning_rate).replace('.', ',')}")
 
     current_validation_losses = np.zeros((EPOCHS_FINETUNING,NUMBER_FOLDS))
     current_final_training_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
@@ -85,9 +88,12 @@ for i in range(5):
         train_ds_clean = TensorDataset(X_train_clean)
         train_ds_noise = TensorDataset(X_train_noise)
         validation_ds = TensorDataset(X_validation_clean)
-        train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
-        train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
-        validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
+        # train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=False)
+        # train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=False)
+        # validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=False)
+        train_dl_clean = DataLoader(train_ds_clean, batch_size=batch_size, shuffle=True)
+        train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=True)
+        validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=True)
 
         model = Model()
         val_loss, final_train, ae = model.fit(noise_parameter,

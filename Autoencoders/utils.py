@@ -17,30 +17,30 @@ def add_noise(img, noise_type, parameter=None):
         return img
 
 
-def display_2d_repr(data, labels, fname=None):
-    """Display a 2d representation of the MNIST digits
-    Parameters
-    ----------
-    data: Tensor
-        2d representation of MNIST digits
-    labels: list
-        the label for each data point in data
-    fname: str
-        filename to save plot in
-    """
-
-    digit_to_color = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple",
-                      "tab:brown", "tab:pink", "tab:gray", "tab:olive", "tab:cyan"]
-    xs = np.array([x[0] for x in data])
-    ys = np.array([x[1] for x in data])
-
-    fig, ax = plt.subplots()
-    labels_to_show = labels[0:len(data)]
-    for digit in range(10):
-        ix = np.where(labels_to_show == digit)
-        ax.scatter(xs[ix], ys[ix], c=digit_to_color[digit],
-                    label=digit, marker=".")
-    ax.legend()
-    if fname is not None:
-        plt.savefig(fname)
-    plt.show()
+# def display_2d_repr(data, labels, fname=None):
+#     """Display a 2d representation of the MNIST digits
+#     Parameters
+#     ----------
+#     data: Tensor
+#         2d representation of MNIST digits
+#     labels: list
+#         the label for each data point in data
+#     fname: str
+#         filename to save plot in
+#     """
+#
+#     digit_to_color = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple",
+#                       "tab:brown", "tab:pink", "tab:gray", "tab:olive", "tab:cyan"]
+#     xs = np.array([x[0] for x in data])
+#     ys = np.array([x[1] for x in data])
+#
+#     fig, ax = plt.subplots()
+#     labels_to_show = labels[0:len(data)]
+#     for digit in range(10):
+#         ix = np.where(labels_to_show == digit)
+#         ax.scatter(xs[ix], ys[ix], c=digit_to_color[digit],
+#                     label=digit, marker=".")
+#     ax.legend()
+#     if fname is not None:
+#         plt.savefig(fname)
+#     plt.show()
