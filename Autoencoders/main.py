@@ -184,7 +184,6 @@ X_train_contrast_noise = torch.Tensor(X_train_contrast_noise)
 X_train_contrast = torch.Tensor(X_train_contrast)
 train_ds_clean = TensorDataset(X_train_contrast)
 train_ds_noise = TensorDataset(X_train_contrast_noise)
-
 train_dl_clean = DataLoader(train_ds_clean, batch_size=optimal_batch_size, shuffle=False)
 train_dl_noise = DataLoader(train_ds_noise, batch_size=optimal_batch_size, shuffle=False)
 
