@@ -24,7 +24,7 @@ x = StandardScaler().fit_transform(X_contrast)
 princa = pca.fit_transform(x)
 
 trust_array = np.zeros(26)
-for i in range(1, 5):
+for i in range(1, 26):
     trust = trustworthiness(X_contrast, princa, n_neighbors=i)
     trust_array[i - 1] = trust
 

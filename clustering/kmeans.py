@@ -39,9 +39,13 @@ kmeans = KMeans(init="k-means++", n_clusters=24, n_init=4)
 kmeans_full = kmeans.fit(X_contrast)
 labels = kmeans.predict(X_contrast)
 
-#run kmeans on contrasted dataset
+#run kmeans on PCA
 kmeans_pca = kmeans.fit(princa)
 labels_pca = kmeans.predict(princa)
+
+#printnumber of iterations
+print('Number of iterations Full Kmeans {}'.format(kmeans_full.n_iter_))
+print('Number of iterations PCA Kmeans {}'.format(kmeans_pca.n_iter_))
 
 #Print scores full dataset
 print('Homogeneity Score Full Dataset: {}'.format(homogeneity_score(y_train, labels)))

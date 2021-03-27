@@ -20,4 +20,3 @@ ks = vector_row = np.array([1])
 
 cont = continuity(x, princa, ks)
 print(cont)
-
