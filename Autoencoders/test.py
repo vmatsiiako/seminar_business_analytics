@@ -26,7 +26,7 @@ optimal_batch_size = 64
 optimal_noise_type = 'gaussian'
 optimal_noise = 2
 optimal_hidden_layers = [500,250,100,13]
-optimal_learning_rate = 0.005
+optimal_learning_rate = 0.003  #try 0.002
 optimal_epoch = 50
 
 # import and extract the data
@@ -83,7 +83,13 @@ test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
                                                    EPOCHS_PRETRAINING,
                                                    optimal_learning_rate)
 
-pickle.dump(autoencoder,open('final_autoencoder_2.sav', 'wb'))
+pickle.dump(autoencoder,open(f"Autoencoder_with"
+      f"_BATCH_SIZE_{str(optimal_batch_size)}"
+      f"_NOISE_TYPE_{optimal_noise_type}"
+      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+      f"_EPOCH_{str(optimal_epoch)}.sav", 'wb'))
 
 # autoencoder = pickle.load(open('final_autoencoder.sav', 'rb'))
 
@@ -91,12 +97,24 @@ visualize_train = DataLoader(train_ds_clean, batch_size=1, shuffle=False)
 reduced_train = np.zeros((len(visualize_train),13))
 for i, features in enumerate(visualize_train):
     reduced_train[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt('reduced_trainset_3.csv', reduced_train, delimiter=',')
+np.savetxt(f"reduced_trainset_with"
+      f"_BATCH_SIZE_{str(optimal_batch_size)}"
+      f"_NOISE_TYPE_{optimal_noise_type}"
+      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+      f"_EPOCH_{str(optimal_epoch)}.csv", reduced_train, delimiter=',')
 
 reduced_test = np.zeros((len(visualize_test),13))
 for i, features in enumerate(visualize_test):
     reduced_test[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt('reduced_testset_3.csv', reduced_test, delimiter=',')
+np.savetxt(f"reduced_test_set_with"
+      f"_BATCH_SIZE_{str(optimal_batch_size)}"
+      f"_NOISE_TYPE_{optimal_noise_type}"
+      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+      f"_EPOCH_{str(optimal_epoch)}.csv", reduced_test, delimiter=',')
 
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
@@ -122,29 +140,20 @@ plt.savefig("final_test_prediction" + " with noise type " + optimal_noise_type +
           " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate).replace('.', ',') +
           " epoch " + str(optimal_epoch) )
 
-# import pandas as pd
-# import numpy as np
-# import matplotlib
-# matplotlib.use('TkAgg')
-# import matplotlib.pyplot as plt
-# import torch
-# import cv2
-# from torch.utils.data import DataLoader, TensorDataset
-# from Autoencoders.utils import add_noise
-# from Autoencoders.model import Model
-# from sklearn.model_selection import KFold
-# import pickle
-#
-# autoencoder = pickle.load(open('final_autoencoder.sav', 'rb'))
-#
-# plt.figure(figsize=(30, 30))
-# #Extract features
-# for i in range(25):
-#     weights = autoencoder.encoders[0].detach().numpy()[:,i+10].reshape(28,28)
-#     ax = plt.subplot(5, 5, i + 1)
-#     plt.imshow(weights)
-#     plt.gray()
-#     ax.get_xaxis().set_visible(False)
-#     ax.get_yaxis().set_visible(False)
-#
-# plt.show()
+# Analyse the features that are captured by the first layer of the model
+plt.figure(figsize=(30, 30))
+for i in range(150):
+    weights = autoencoder.encoders[0].detach().numpy()[:,i+3].reshape(28,28)
+    ax = plt.subplot(15, 10, i + 1)
+    plt.imshow(weights)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+plt.savefig(f"features_captured_with"
+      f"_BATCH_SIZE_{str(optimal_batch_size)}"
+      f"_NOISE_TYPE_{optimal_noise_type}"
+      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+      f"_EPOCH_{str(optimal_epoch)}")
