@@ -20,6 +20,6 @@ for i in range(len(X_contrast)):
 
 X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
 
-pca = PCA(n_components=5)
+pca = PCA(n_components=13)
 principalComponents = pca.fit_transform(X_contrast)
 print(pca.explained_variance_ratio_)
