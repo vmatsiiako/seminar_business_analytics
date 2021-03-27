@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 import cv2
 from sklearn.manifold import TSNE
@@ -9,8 +7,6 @@ from sklearn.preprocessing import StandardScaler
 import coranking
 import matplotlib.pyplot as plt
 from coranking.metrics import trustworthiness, continuity
-
-#https://coranking.readthedocs.io/en/latest/
 
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 X_train = df.iloc[:,1:].values

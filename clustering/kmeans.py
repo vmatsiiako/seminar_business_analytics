@@ -17,6 +17,7 @@ df = pd.read_csv("../Data/sign_mnist_train.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
+#load in embedding from autoencoders on train data
 df_ae = pd.read_csv("../Data/reduced_trainset_2.csv", header=None)
 X_train_ae = df_ae.iloc[:,0:].values
 
@@ -25,17 +26,18 @@ df_test = pd.read_csv("../Data/sign_mnist_test.csv")
 X_test = df_test.iloc[:,1:].values
 y_test = df_test.iloc[:,0].values
 
+#load in embedding from autoencoders on test data
 df_test_ae = pd.read_csv("../Data/reduced_testset_2.csv", header=None)
 X_test_ae = df_test_ae.iloc[:,0:].values
 
-#contrast data
+#contrast train data
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
     X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
 
-# normalize data
+# normalize train data
 X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
 X_train = X_train.astype('float32') / 255.0 - 0.5
 
@@ -50,7 +52,7 @@ for i in range(len(X_contrast_test)):
 X_contrast_test = X_contrast_test.astype('float32') / 255.0 - 0.5
 X_test = X_test.astype('float32') / 255.0 - 0.5
 
-#run PCA with n=13 principal components
+#run PCA with n=13 principal components on training set
 pca = PCA(n_components=13)
 princa = pca.fit_transform(X_contrast)
 
