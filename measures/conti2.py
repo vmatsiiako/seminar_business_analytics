@@ -2,6 +2,7 @@ import random
 
 import numpy as np
 import cv2
+from sklearn.manifold import TSNE
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -30,6 +31,10 @@ X_train = X_train.astype('float32') / 255.0 - 0.5
 pca = PCA(n_components=13)
 princa = pca.fit_transform(X_contrast)
 
+#run tsne on full data
+TSNE = TSNE(n_components=2, perplexity=40)
+TSNE_output = TSNE.fit_transform(X_contrast)
+
 #pick random subsample to calculate the measures for
 new_data = np.hstack((X_contrast, princa))
 number_of_rows = new_data.shape[0]
@@ -37,9 +42,11 @@ random_indices = np.random.choice(number_of_rows, size=13737, replace=False)
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
+tsne_random = random_sample[]
 
 #Q = coranking.coranking_matrix(high_data, low_data)
 Q = coranking.coranking_matrix(full_random, pca_random)
+Q_tsne = Q = coranking.coranking_matrix(full_random, TSNE_output)
 
 trust_pca = trustworthiness(Q, min_k=1, max_k=25)
 cont_pca = continuity(Q, min_k=1, max_k=25)
