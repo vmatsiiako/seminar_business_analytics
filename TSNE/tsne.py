@@ -27,13 +27,17 @@ pca = PCA(n_components=50)
 x = StandardScaler().fit_transform(X_contrast)
 princa = pca.fit_transform(x)
 
-#run tsne
-#TSNE = TSNE(n_components=2, perplexity=40, init='pca')
+#run tsne on PCA
+#TSNE = TSNE(n_components=2, perplexity=40)
 #TSNE_output = TSNE.fit_transform(princa)
 
-#run tsne with internal PCA function
-TSNE = TSNE(n_components=2, perplexity=40, init='pca, n_components=13')
+#run tsne on full data
+TSNE = TSNE(n_components=2, perplexity=40)
 TSNE_output = TSNE.fit_transform(X_contrast)
+
+#run tsne with internal PCA function
+#TSNE = TSNE(n_components=2, perplexity=40, init='pca, n_components=13')
+#TSNE_output = TSNE.fit_transform(X_contrast)
 
 
 tsneDf = pd.DataFrame(data = TSNE_output)
@@ -43,7 +47,6 @@ finalDf['tsne-2d-one'] = finalDf.loc[:,0].values
 finalDf['tsne-2d-two'] = finalDf.loc[:,1].values
 
 plt.figure(figsize=(16,10))
-targets = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 sns.scatterplot(
     x="tsne-2d-one", y="tsne-2d-two",
     hue = y_train,
