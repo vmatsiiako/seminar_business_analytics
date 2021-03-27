@@ -69,23 +69,33 @@ train_dl_noise = DataLoader(train_ds_noise, batch_size=optimal_batch_size, shuff
 
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
-visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
+visualize_test = DataLoader(test_ds, batch_size=1, shuffle=False)
 final_model = Model()
 test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
                                                    optimal_batch_size,
                                                    optimal_hidden_layers,
                                                    train_dl_clean,
                                                    train_dl_noise,
-                                                   visualize,
+                                                   visualize_test,
                                                    optimal_noise_type,
                                                    optimal_epoch,
                                                    EPOCHS_PRETRAINING,
                                                    optimal_learning_rate)
 
+visualize_train = DataLoader(train_ds_clean, batch_size=1, shuffle=False)
+reduced_train = np.zeros((len(visualize_train),13))
+for i, features in enumerate(visualize_train):
+    reduced_train[i] = autoencoder.encode(features[0]).detach().numpy()
+np.savetxt('reduced_trainset.csv', reduced_train, delimiter=',')
+
+reduced_test = np.zeros((len(visualize_test),13))
+for i, features in enumerate(visualize_test):
+    reduced_test[i] = autoencoder.encode(features[0]).detach().numpy()
+np.savetxt('reduced_testset.csv', reduced_test, delimiter=',')
 
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
-for i, features in enumerate(visualize):
+for i, features in enumerate(visualize_test):
     # Display original
     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
     plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
@@ -107,3 +117,13 @@ plt.savefig("final_test_prediction" + " with noise type " + optimal_noise_type +
           " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate).replace('.', ',') +
           " epoch " + str(optimal_epoch) )
 
+plt.figure(figsize=(20, 5))
+#Extract features
+for i in range(25):
+    weights = dae.encoders[0].detach().numpy()[:,i+10].reshape(28,28)
+    plt.imshow(weights)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    plt.show()
+plt.savefig("features_first_hidden_layer")

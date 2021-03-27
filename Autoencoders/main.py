@@ -26,6 +26,8 @@ EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 
+#original: bs-64, gaussian, noise = 1, layers = [500,250,100,13], lr = 0.01, epochs fine= 50
+
 # bs-32, gaussian, noise = 1, layers = [500,250,100,13], lr = 0.01, epochs fine= 70
 # bs-32, gaussian, noise = 2, layers = [500,250,100,13], lr = 0.01, epochs fine= 70
 # bs-64, gaussian, noise = 2, layers = [500,250,100,13], lr = 0.01, epochs fine= 70
