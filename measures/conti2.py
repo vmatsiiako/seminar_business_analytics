@@ -139,7 +139,7 @@ plt.plot(trust_ae, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('pca test data')
+plt.set_window_title('ae train data')
 plt.show()
 
 #plotting pca on test data
@@ -148,7 +148,7 @@ plt.plot(trust_ae_test, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('pca test data')
+plt.set_window_title('ae test data')
 plt.show()
 
 #plotting tsne
