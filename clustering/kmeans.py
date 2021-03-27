@@ -43,6 +43,10 @@ labels = kmeans.predict(X_contrast)
 kmeans_pca = kmeans.fit(princa)
 labels_pca = kmeans.predict(princa)
 
+#printnumber of iterations
+print('Number of iterations Full Kmeans {}'.format(kmeans_full.n_iter_))
+print('Number of iterations PCA Kmeans {}'.format(kmeans_pca.n_iter_))
+
 #Print scores full dataset
 print('Homogeneity Score Full Dataset: {}'.format(homogeneity_score(y_train, labels)))
 print('Completeness Score Full Dataset: {}'.format(completeness_score(y_train, labels)))
