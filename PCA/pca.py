@@ -78,6 +78,25 @@ principalComponents = pca.fit_transform(X_contrast)
 # ax.grid()
 # plt.show()
 
+#2d plot
+pca = PCA(n_components=2)
+principalComponents = pca.fit_transform(X_contrast)
+principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2'])
+
+finalDf = pd.concat([principalDf, df[['label']]], axis=1)
+#finalDf['pc1'] = finalDf.loc[:,0].values
+#finalDf['pc2'] = finalDf.loc[:,1].values
+
+plt.figure(figsize=(16,10))
+sns.scatterplot(
+    x="pc1", y="pc2",
+    hue = y_train,
+    palette=sns.color_palette("hls", 24),
+    data=finalDf,
+    legend="full"
+)
+plt.show()
+
 print(pca.explained_variance_ratio_)
 
 #plt.savefig('pca_3d.pdf')
