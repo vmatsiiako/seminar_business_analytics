@@ -48,7 +48,7 @@ for i in range(len(X_contrast_test)):
     image = image.astype(np.uint8)
     X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,784)
 
-# normalize data
+# normalize test data
 X_contrast_test = X_contrast_test.astype('float32') / 255.0 - 0.5
 X_test = X_test.astype('float32') / 255.0 - 0.5
 
@@ -71,7 +71,7 @@ labels = kmeans.predict(X_contrast)
 kmeans_pca = kmeans.fit(princa)
 labels_pca = kmeans.predict(princa)
 
-#run kemans on autoencoders train
+#run kmeans on autoencoders train
 kmeans_ae = kmeans.fit(X_train_ae)
 labels_ae = kmeans.predict(X_train_ae)
 
@@ -87,37 +87,42 @@ labels_pca_test = kmeans.predict(princa_test)
 kmeans_ae_test = kmeans.fit(X_test_ae)
 labels_ae_test = kmeans.predict(X_test_ae)
 
-#printnumber of iterations
-print('Number of iterations Full Kmeans {}'.format(kmeans_full.n_iter_))
-print('Number of iterations PCA Kmeans {}'.format(kmeans_pca.n_iter_))
-print('Number of iterations autoencoder Kmeans {}'.format(kmeans_ae.n_iter_))
+#printnumber of iterations train data
+print('Number of iterations Full Kmeans train data {}'.format(kmeans_full.n_iter_))
+print('Number of iterations PCA Kmeans train data {}'.format(kmeans_pca.n_iter_))
+print('Number of iterations autoencoder Kmeans train data {}'.format(kmeans_ae.n_iter_))
 
-#Print scores full dataset
-print('Homogeneity Score Full Dataset: {}'.format(homogeneity_score(y_train, labels)))
-print('Completeness Score Full Dataset: {}'.format(completeness_score(y_train, labels)))
-print('V-score Score Full Dataset: {}'.format(v_measure_score(y_train, labels)))
+#printnumber of iterations test data
+print('Number of iterations Full Kmeans test data{}'.format(kmeans_full_test.n_iter_))
+print('Number of iterations PCA Kmeans test data {}'.format(kmeans_pca_test.n_iter_))
+print('Number of iterations autoencoder Kmeans test data {}'.format(kmeans_ae_test.n_iter_))
 
-#Print Scores PCA data
-print('Homogeneity Score PCA: {}'.format(homogeneity_score(y_train, labels_pca)))
-print('Completeness Score PCA: {}'.format(completeness_score(y_train, labels_pca)))
-print('V-score Score PCA: {}'.format(v_measure_score(y_train, labels_pca)))
+#Print scores full train dataset
+print('Homogeneity Score Full Train Dataset: {}'.format(homogeneity_score(y_train, labels)))
+print('Completeness Score Full Train Dataset: {}'.format(completeness_score(y_train, labels)))
+print('V-score Score Full train Dataset: {}'.format(v_measure_score(y_train, labels)))
 
-#Print Scores autoencoders data
-print('Homogeneity Score AE: {}'.format(homogeneity_score(y_train, labels_ae)))
-print('Completeness Score Ae: {}'.format(completeness_score(y_train, labels_ae)))
-print('V-score Score AE: {}'.format(v_measure_score(y_train, labels_ae)))
+#Print Scores PCA train data
+print('Homogeneity Score PCA Train Dataset: {}'.format(homogeneity_score(y_train, labels_pca)))
+print('Completeness Score PCA Train Dataset: {}'.format(completeness_score(y_train, labels_pca)))
+print('V-score Score PCA Train Dataset: {}'.format(v_measure_score(y_train, labels_pca)))
+
+#Print Scores autoencoders train data
+print('Homogeneity Score AE Train Dataset: {}'.format(homogeneity_score(y_train, labels_ae)))
+print('Completeness Score AE Train Dataset: {}'.format(completeness_score(y_train, labels_ae)))
+print('V-score Score AE Train Dataset: {}'.format(v_measure_score(y_train, labels_ae)))
 
 #Print scores full test dataset
-print('Homogeneity Score Test Dataset: {}'.format(homogeneity_score(y_test, labels_test)))
-print('Completeness Score Full Dataset: {}'.format(completeness_score(y_test, labels_test)))
-print('V-score Score Full Dataset: {}'.format(v_measure_score(y_test, labels_test)))
+print('Homogeneity Score Full Test Dataset: {}'.format(homogeneity_score(y_test, labels_test)))
+print('Completeness Score Full Test Dataset: {}'.format(completeness_score(y_test, labels_test)))
+print('V-score Score Full Test Dataset: {}'.format(v_measure_score(y_test, labels_test)))
 
 #Print Scores PCA test data
-print('Homogeneity Score Test PCA: {}'.format(homogeneity_score(y_test, labels_pca_test)))
-print('Completeness Score Test PCA: {}'.format(completeness_score(y_test, labels_pca_test)))
-print('V-score Score Test PCA: {}'.format(v_measure_score(y_test, labels_pca_test)))
+print('Homogeneity Score Test Dataset PCA: {}'.format(homogeneity_score(y_test, labels_pca_test)))
+print('Completeness Score Test Dataset PCA: {}'.format(completeness_score(y_test, labels_pca_test)))
+print('V-score Score Test Dataset PCA: {}'.format(v_measure_score(y_test, labels_pca_test)))
 
 #Print Scores autoencoders test data
-print('Homogeneity Score Test AE: {}'.format(homogeneity_score(y_test, labels_ae_test)))
-print('Completeness Score Test Ae: {}'.format(completeness_score(y_test, labels_ae_test)))
-print('V-score Score Test AE: {}'.format(v_measure_score(y_test, labels_ae_test)))
+print('Homogeneity Score Test Dataset AE: {}'.format(homogeneity_score(y_test, labels_ae_test)))
+print('Completeness Score Test Dataset Ae: {}'.format(completeness_score(y_test, labels_ae_test)))
+print('V-score Score Test Dataset AE: {}'.format(v_measure_score(y_test, labels_ae_test)))
