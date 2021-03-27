@@ -52,9 +52,9 @@ for i in range(len(X_train_contrast)):
     image = image.astype(np.uint8)
     X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
-X_test_contrast = np.zeros(np.shape(X_train))
+X_test_contrast = np.zeros(np.shape(X_test))
 for i in range(len(X_test_contrast)):
-    image = X_train[i, :]
+    image = X_test[i, :]
     image = image.astype(np.uint8)
     X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
