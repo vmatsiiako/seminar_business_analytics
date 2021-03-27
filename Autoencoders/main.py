@@ -26,6 +26,7 @@ EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 
+#Models to try
 #original: bs-64, gaussian, noise = 1, layers = [500,250,100,13], lr = 0.01, epochs fine= 50
 
 # bs-32, gaussian, noise = 1, layers = [500,250,100,13], lr = 0.01, epochs fine= 70
@@ -39,33 +40,45 @@ NUMBER_FOLDS = 5
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 df_test = pd.read_csv("../Data/sign_mnist_test.csv")
+
+#Extract the training features and labels into numpy
 X_train = df.iloc[:,1:].values 
 y_train = df.iloc[:,0].values
+
+#Extract the test features and labels into numpy
 X_test = df_test.iloc[:,1:].values 
 y_test = df_test.iloc[:,0].values
-del df  #delete dataframe to reduce usage of memory
-del df_test #delete dataframe to reduce usage of memory
 
+#delete dataframes to reduce usage of memory
+del df
+del df_test
+
+#Create the contrasted training set
 X_train_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_train_contrast)):
     image = X_train[i, :]
     image = image.astype(np.uint8)
     X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
+#Create the contraste test set
 X_test_contrast = np.zeros(np.shape(X_test))
 for i in range(len(X_test_contrast)):
     image = X_test[i, :]
     image = image.astype(np.uint8)
     X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
-# normalize data
+# normalize normal and contrasted training sets
 X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
-X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
+
+# normalize normal and contrasted test sets
+X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
+#extract the folds for cross-validation
 kf = KFold(n_splits=NUMBER_FOLDS)
 
+#initialise the optimal parameters that will be used to train the optimal model
 optimal_loss = 0
 optimal_noise = None
 optimal_noise_type = None
@@ -74,6 +87,7 @@ optimal_hidden_layers = None
 optimal_epoch = None
 optimal_learning_rate = None
 
+#cross-validation
 for i in range(6):
     noise_type = random.sample(NOISE.keys(), 1)[0]
     noise_parameter = random.sample(NOISE[noise_type], 1)[0]
@@ -94,14 +108,18 @@ for i in range(6):
     for train_index, test_index in kf.split(X_train_contrast):
         print(f"Starting_Fold_{str(column+1)}")
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
+
         # Convert the data to torch types
         X_train_clean = torch.Tensor(X_train_CV)
         X_validation_clean = torch.Tensor(X_validation_CV)
+
+        # construct the noised train set
         X_train_noise = np.zeros(np.shape(X_train_CV))
         for i in range(len(X_train_CV)):
             X_train_noise[i] = add_noise(X_train_CV[i, :], noise_type=noise_type, parameter=noise_parameter)
         X_train_noise = torch.Tensor(X_train_noise)
 
+        # Create the TensorDataset and the DataLoader
         train_ds_clean = TensorDataset(X_train_clean)
         train_ds_noise = TensorDataset(X_train_noise)
         validation_ds = TensorDataset(X_validation_clean)
@@ -113,6 +131,7 @@ for i in range(6):
         # train_dl_noise = DataLoader(train_ds_noise, batch_size=batch_size, shuffle=True)
         # validation_dl = DataLoader(validation_ds, batch_size=batch_size, shuffle=True)
 
+        #Initialise and fit the model
         model = Model()
         val_loss, final_train, ae = model.fit(noise_parameter,
                                               batch_size,
@@ -120,24 +139,25 @@ for i in range(6):
                                               train_dl_clean,
                                               train_dl_noise,
                                               validation_dl,
-                                              # X_train_clean,
-                                              # X_train_noise,
-                                              # X_validation_clean,
                                               noise_type,
                                               EPOCHS_FINETUNING,
                                               EPOCHS_PRETRAINING,
                                               learning_rate)
-        # val_loss = np.array(val_loss)
-        # final_train = np.array(final_train)
+
+        # Save the vlaidation loss and training loss of this fold
         current_validation_losses[:, column] = val_loss
         current_final_training_losses[:, column] = final_train
         column += 1
 
+    # Compute the average validation loss and train loss to be able to plot it
     average_validation_loss = current_validation_losses.mean(axis=1)
     average_final = current_final_training_losses.mean(axis=1)
+
+    # Find the minimum val loss to choose the optimal model
     minimum_loss = average_validation_loss.min()
     epoch = average_validation_loss.argmin()+1
 
+    # Plot the average validation and training losses for this set of hyperparameters
     N = np.arange(0, EPOCHS_FINETUNING)
     plt.style.use("ggplot")
     plt.figure()
@@ -154,6 +174,7 @@ for i in range(6):
                 f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]"
                 f"_LEATNING_RATE_{str(learning_rate).replace('.', ',')}")
 
+    # Save the optimal hyperparameter set
     if i == 0 or minimum_loss < optimal_loss:
         optimal_loss = minimum_loss
         optimal_noise = noise_parameter
@@ -186,30 +207,38 @@ print(f"Optimal_model_is"
 # train_ds_noise = TensorDataset(X_train_noise)
 # validation_ds = TensorDataset(X_validation_clean)
 
+# Create nosied dataset for pretraining on the full training set with optimal hyperparameters
 X_train_contrast_noise = np.zeros(np.shape(X_train_contrast))
 for i in range(len(X_train_contrast)):
     X_train_contrast_noise[i] = add_noise(X_train_contrast[i, :], noise_type=optimal_noise_type, parameter=optimal_noise)
+
+# Convert numpy to tensors
 X_train_contrast_noise = torch.Tensor(X_train_contrast_noise)
 X_train_contrast = torch.Tensor(X_train_contrast)
+X_test_contrast = torch.Tensor(X_test_contrast)
+
+# Create TensorDataset
 train_ds_clean = TensorDataset(X_train_contrast)
 train_ds_noise = TensorDataset(X_train_contrast_noise)
+test_ds = TensorDataset(X_test_contrast)
+
+# Create DataLoader to fid the model
 train_dl_clean = DataLoader(train_ds_clean, batch_size=optimal_batch_size, shuffle=False)
 train_dl_noise = DataLoader(train_ds_noise, batch_size=optimal_batch_size, shuffle=False)
-
-X_test_contrast = torch.Tensor(X_test_contrast)
-test_ds = TensorDataset(X_test_contrast)
 visualize = DataLoader(test_ds, batch_size=1, shuffle=False)
+
+# Initialise the model and train it with the full training set and with the optimal hyperparameters
 final_model = Model()
 test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
-                                                   optimal_batch_size,
-                                                   optimal_hidden_layers,
-                                                   train_dl_clean,
-                                                   train_dl_noise,
-                                                   visualize,
-                                                   optimal_noise_type,
-                                                   optimal_epoch,
-                                                   EPOCHS_PRETRAINING,
-                                                   optimal_learning_rate)
+                                                        optimal_batch_size,
+                                                        optimal_hidden_layers,
+                                                        train_dl_clean,
+                                                        train_dl_noise,
+                                                        visualize,
+                                                        optimal_noise_type,
+                                                        optimal_epoch,
+                                                        EPOCHS_PRETRAINING,
+                                                        optimal_learning_rate)
 
 
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
