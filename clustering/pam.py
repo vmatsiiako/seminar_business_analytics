@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, homogeneity_score, completeness_score, v_measure_score
+from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 from sklearn_extra.cluster import KMedoids
 
 # load in the data
@@ -33,8 +33,12 @@ pam_full = pam.fit(X_contrast)
 labels = pam.predict(X_contrast)
 
 #pam on PCA
-pam_PCA = pam.fit(princa)
+pam_pca = pam.fit(princa)
 labels_pca = pam.predict(princa)
+
+#printnumber of iterations
+print('Number of iterations Full Kmeans {}'.format(pam_full.n_iter_))
+print('Number of iterations PCA Kmeans {}'.format(pam_pca.n_iter_))
 
 #Print scores full dataset
 print('Homogeneity Score Full Dataset: {}'.format(homogeneity_score(y_train, labels)))
