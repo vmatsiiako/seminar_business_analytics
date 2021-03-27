@@ -38,25 +38,49 @@ TSNE_output = TSNE.fit_transform(X_contrast)
 #pick random subsample to calculate the measures for
 new_data = np.hstack((X_contrast, princa))
 number_of_rows = new_data.shape[0]
-random_indices = np.random.choice(number_of_rows, size=13737, replace=False)
+random_indices = np.random.choice(number_of_rows, size=100, replace=False)
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
-tsne_random = random_sample[]
+
+#pick random subsample to calculate the measures for
+new_data = np.hstack((X_contrast, TSNE_output))
+number_of_rows = new_data.shape[0]
+random_indices = np.random.choice(number_of_rows, size=100, replace=False)
+random_sample = new_data[random_indices, :]
+full_random_tsne = random_sample[:,2:]
+tsne_random = random_sample[:,:1]
 
 #Q = coranking.coranking_matrix(high_data, low_data)
 Q = coranking.coranking_matrix(full_random, pca_random)
-Q_tsne = Q = coranking.coranking_matrix(full_random, TSNE_output)
+Q_tsne = coranking.coranking_matrix(full_random_tsne, tsne_random)
 
+#measures for PCA
 trust_pca = trustworthiness(Q, min_k=1, max_k=25)
 cont_pca = continuity(Q, min_k=1, max_k=25)
 print(trust_pca)
 print(cont_pca)
 
-#plotting
+#measures for tsne
+trust_tsne = trustworthiness(Q_tsne, min_k=1, max_k=25)
+cont_tsne = continuity(Q_tsne, min_k=1, max_k=25)
+print(trust_tsne)
+print(cont_tsne)
+
+#plotting pca
 plt.plot(cont_pca, "-m", label="continuity measure")
 plt.plot(trust_pca, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
+plt.set_window_title('pca')
+plt.show()
+
+#plotting tsne
+plt.plot(cont_tsne, "-m", label="continuity measure")
+plt.plot(trust_tsne, "-c", label="trustworthiness measure")
+plt.legend(loc="upper right")
+plt.xlabel('Number of Neighbors')
+plt.ylabel('Measure')
+plt.set_window_title('Tsne')
 plt.show()
