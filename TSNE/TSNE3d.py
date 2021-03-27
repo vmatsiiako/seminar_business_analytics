@@ -22,7 +22,7 @@ for i in range(len(X_contrast)):
     image = image.astype(np.uint8)
     X_contrast[i] = cv2.equalizeHist(image).reshape(1, 784)
 
-pca = PCA(n_components=13)
+pca = PCA(n_components=50)
 # x = df.loc[:, features].values
 x = StandardScaler().fit_transform(X_contrast)
 princa = pca.fit_transform(x)

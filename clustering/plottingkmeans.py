@@ -30,10 +30,14 @@ X_scale = scaler.transform(df)
 df_scale = pd.DataFrame(X_scale, columns=df.columns)
 df_scale.head()
 
+#kmeans full
+
+
 
 pca_scale = pca.fit_transform(df_scale)
 pca_df_scale = pd.DataFrame(pca_scale, columns=['pc1','pc2'])
 
+#kmeans PCA
 kmeans = KMeans(init="k-means++", n_clusters=10, n_init=10)
 kmeans_pca = kmeans.fit(pca_df_scale)
 labels_pca_scale = kmeans_pca.labels_
@@ -44,4 +48,4 @@ print('KMeans PCA Scaled Silhouette Score: {}'.format(silhouette_score(df_scale,
 plt.figure(figsize = (10,10))
 sns.scatterplot(clusters_pca_scale.iloc[:,0],clusters_pca_scale.iloc[:,1], hue=labels_pca_scale, palette='Set1', s=100, alpha=0.2).set_title('KMeans Clusters (2) Derived from PCA', fontsize=15)
 plt.legend()
-#plt.show()
+plt.show()
