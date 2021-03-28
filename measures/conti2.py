@@ -14,7 +14,7 @@ X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
 #load in embedding from autoencoders on train data
-df_ae = pd.read_csv("../Data/reduced_trainset_2.csv", header=None)
+df_ae = pd.read_csv("../Data/reduced_trainset_3.csv", header=None)
 X_train_ae = df_ae.iloc[:,0:].values
 
 #load in test data
@@ -23,7 +23,7 @@ X_test = df_test.iloc[:,1:].values
 y_test = df_test.iloc[:,0].values
 
 #load in embedding from autoencoders on test data
-df_test_ae = pd.read_csv("../Data/reduced_testset_2.csv", header=None)
+df_test_ae = pd.read_csv("../Data/reduced_testset_3.csv", header=None)
 X_test_ae = df_test_ae.iloc[:,0:].values
 
 #contrast train data
@@ -61,7 +61,7 @@ princa_test = pca.fit_transform(X_contrast_test)
 new_data = np.hstack((X_contrast, princa))
 new_data_ae = np.hstack((X_contrast, X_train_ae))
 n_train = new_data.shape[0]
-random_indices = np.random.choice(n_train, size=100, replace=False)
+random_indices = np.random.choice(n_train, size=13727, replace=False)
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
@@ -121,7 +121,8 @@ plt.plot(trust_pca, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('pca train data')
+plt.title('pca train data')
+plt.savefig('pca_train_data.png')
 plt.show()
 
 #plotting pca on test data
@@ -130,7 +131,8 @@ plt.plot(trust_pca_test, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('pca test data')
+plt.title('pca test data')
+plt.savefig('pca_test_data.png')
 plt.show()
 
 #plotting pca on test data
@@ -139,7 +141,8 @@ plt.plot(trust_ae, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('ae train data')
+plt.title('ae train data')
+plt.savefig('ae_train_data.png')
 plt.show()
 
 #plotting pca on test data
@@ -148,7 +151,8 @@ plt.plot(trust_ae_test, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.set_window_title('ae test data')
+plt.title('ae test data')
+plt.savefig('ae_test_data.png')
 plt.show()
 
 #plotting tsne
