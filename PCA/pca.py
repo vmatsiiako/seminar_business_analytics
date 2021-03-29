@@ -99,4 +99,6 @@ plt.show()
 
 print(pca.explained_variance_ratio_)
 
+
+
 #plt.savefig('pca_3d.pdf')
