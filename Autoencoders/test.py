@@ -23,11 +23,11 @@ EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 optimal_batch_size = 64
-optimal_noise_type = 'gaussian'
-optimal_noise = 2
-optimal_hidden_layers = [500,250,100,13]
-optimal_learning_rate = 0.003  #try 0.002
-optimal_epoch = 50
+optimal_noise_type = 'zeros'
+optimal_noise = 0.3
+optimal_hidden_layers = [800,400,200,13]
+optimal_learning_rate = 0.001  #try 0.002
+optimal_epoch = 80
 
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -83,7 +83,9 @@ test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
                                                    EPOCHS_PRETRAINING,
                                                    optimal_learning_rate)
 
-pickle.dump(autoencoder,open(f"Autoencoder_with"
+print(test_loss)
+
+pickle.dump(autoencoder,open(f"Noise_Autoencoder_with"
       f"_BATCH_SIZE_{str(optimal_batch_size)}"
       f"_NOISE_TYPE_{optimal_noise_type}"
       f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
@@ -135,10 +137,40 @@ for i, features in enumerate(visualize_test):
     if i == 9:
         break
 
-plt.savefig("final_test_prediction" + " with noise type " + optimal_noise_type +
-          " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
-          " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate).replace('.', ',') +
-          " epoch " + str(optimal_epoch) )
+plt.savefig(f"finale_test_predictions_with_noise"
+            f"_BATCH_SIZE_{str(optimal_batch_size)}"
+            f"_NOISE_TYPE_{optimal_noise_type}"
+            f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+            f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+            f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+            f"_EPOCHS_{str(optimal_epoch)}")
+
+NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
+plt.figure(figsize=(20, 4))
+for i, features in enumerate(visualize_train):
+    # Display original
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
+    plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    # Display reconstruction
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
+    plt.imshow(autoencoder(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    if i == 9:
+        break
+
+plt.savefig(f"finale_train_predictions_with_noise"
+            f"_BATCH_SIZE_{str(optimal_batch_size)}"
+            f"_NOISE_TYPE_{optimal_noise_type}"
+            f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+            f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+            f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+            f"_EPOCHS_{str(optimal_epoch)}")
 
 # Analyse the features that are captured by the first layer of the model
 plt.figure(figsize=(30, 30))
@@ -150,7 +182,7 @@ for i in range(150):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
-plt.savefig(f"features_captured_with"
+plt.savefig(f"features_captured_with_noise"
       f"_BATCH_SIZE_{str(optimal_batch_size)}"
       f"_NOISE_TYPE_{optimal_noise_type}"
       f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"

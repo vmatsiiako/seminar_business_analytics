@@ -98,8 +98,12 @@ class Model(nn.Module):
             epoch_loss = 0
             validation_epoch_loss = 0
             final_training_loss = 0
-            for i, features in enumerate(train_dl_clean):
-                batch_loss = loss(features[0], ae(features[0]))
+            dataloader_iterator_ae = iter(train_dl_clean)   #comment out to not have noise
+            # for i, features in enumerate(train_dl_clean):
+            for i, features in enumerate(train_dl_noise):   #comment out to not have noise
+                output = ae(features[0])    #comment out to not have noise
+                # batch_loss = loss(features[0], ae(features[0]))
+                batch_loss = loss(output, next(dataloader_iterator_ae)[0])  #comment out to not have noise
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()

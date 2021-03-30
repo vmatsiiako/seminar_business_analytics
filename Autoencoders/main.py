@@ -20,12 +20,14 @@ NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 BATCH_SIZE = [32, 64]
 NOISE = {'zeros': [0, 0.1, 0.2, 0.3, 0.5, 0.6], 'gaussian': [1, 1.25, 1.5, 1.75, 2, 2.25]}
-HIDDEN_LAYERS = [[500, 250, 100, 13], [500, 250, 13], [1000, 500, 250, 13]]
-LEARNING_RATE = [0.005, 0.0075, 0.01, 0.0125, 0.015]
+HIDDEN_LAYERS = [[800, 400, 200, 13], [800, 250, 13], [620,330,100,13], [500, 250, 100, 13] ]
+LEARNING_RATE = [0.003, 0.005, 0.0075, 0.01]
 EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 60
 NUMBER_FOLDS = 5
-
+# NOISE = {'zeros': [0.6]}
+# HIDDEN_LAYERS = [[800, 400, 200, 13]]
+# LEARNING_RATE = [ 0.005]
 #Models to try
 #original: bs-64, gaussian, noise = 1, layers = [500,250,100,13], lr = 0.01, epochs fine= 50
 
@@ -167,12 +169,14 @@ for i in range(12):
     plt.xlabel("Epoch #")
     plt.ylabel("Loss/Accuracy")
     plt.legend(loc="lower left")
-    plt.savefig(f"loss_graph"
+    plt.savefig(f"loss_graph_with_noise"
                 f"_BATCH_SIZE_{str(batch_size)}"
                 f"_NOISE_TYPE_{noise_type}"
                 f"_NOISE_PERCENTAGE_{str(noise_parameter).replace('.', ',')}"
                 f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]"
                 f"_LEATNING_RATE_{str(learning_rate).replace('.', ',')}")
+
+    print(minimum_loss)
 
     # Save the optimal hyperparameter set
     if i == 0 or minimum_loss < optimal_loss:
@@ -184,7 +188,7 @@ for i in range(12):
         optimal_epoch = epoch
         optimal_learning_rate = learning_rate
 
-print(f"Optimal_model_is"
+print(f"Optimal_model_with_noise_is"
       f"_BATCH_SIZE_{str(optimal_batch_size)}"
       f"_NOISE_TYPE_{optimal_noise_type}"
       f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
@@ -241,14 +245,14 @@ test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
                                                         optimal_learning_rate)
 
 # Save the optimal trained model using pickle
-pickle.dump(autoencoder,open(f"Autoencoder_with"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}"
-      f"_LOSS_{str(optimal_loss).replace('.', ',')}.sav", 'wb'))
+pickle.dump(autoencoder,open(f"Autoencoder_with_noise_"
+                             f"_BATCH_SIZE_{str(optimal_batch_size)}"
+                             f"_NOISE_TYPE_{optimal_noise_type}"
+                             f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+                             f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+                             f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+                             f"_EPOCH_{str(optimal_epoch)}"
+                             f"_LOSS_{str(optimal_loss).replace('.', ',')}.sav", 'wb'))
 
 # If we need to retrive the model we can use this
 # autoencoder = pickle.load(open('final_autoencoder.sav', 'rb'))
@@ -258,20 +262,20 @@ visualize_train = DataLoader(train_ds_clean, batch_size=1, shuffle=False)
 reduced_train = np.zeros((len(visualize_train),13))
 for i, features in enumerate(visualize_train):
     reduced_train[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt(f"reduced_trainset_with"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}"
-      f"_LOSS_{str(optimal_loss).replace('.', ',')}.csv", reduced_train, delimiter=',')
+np.savetxt(f"reduced_trainset_with_noise_"
+           f"_BATCH_SIZE_{str(optimal_batch_size)}"
+           f"_NOISE_TYPE_{optimal_noise_type}"
+           f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+           f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
+           f"_EPOCH_{str(optimal_epoch)}"
+           f"_LOSS_{str(optimal_loss).replace('.', ',')}.csv", reduced_train, delimiter=',')
 
 # Save the lower dimensional test dataset as predicted by the optimal autoencoder
 reduced_test = np.zeros((len(visualize_test),13))
 for i, features in enumerate(visualize_test):
     reduced_test[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt(f"reduced_test_set_with"
+np.savetxt(f"reduced_test_set_with_noise"
       f"_BATCH_SIZE_{str(optimal_batch_size)}"
       f"_NOISE_TYPE_{optimal_noise_type}"
       f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
@@ -300,7 +304,7 @@ for i, features in enumerate(visualize_test):
         break
 
 plt.savefig("final_test_prediction" + " with noise type " + optimal_noise_type +
-          " [" + str(optimal_noise) + "], batch size " + str(optimal_batch_size) +
+          " [" + str(optimal_noise).replace('.', ',') + "], batch size " + str(optimal_batch_size) +
           " hidden layers " + ','.join([str(elem) for elem in optimal_hidden_layers]) + " lr " + str(optimal_learning_rate).replace('.', ',') +
           " epoch " + str(optimal_epoch) + " loss " + str(optimal_loss).replace('.', ','))
 
@@ -314,7 +318,7 @@ for i in range(150):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
-plt.savefig(f"features_captured_with"
+plt.savefig(f"features_captured_with_noise"
       f"_BATCH_SIZE_{str(optimal_batch_size)}"
       f"_NOISE_TYPE_{optimal_noise_type}"
       f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
