@@ -14,7 +14,7 @@ X_train = df.loc[:, features].values
 y_train = df.iloc[:,0].values
 
 #load in embedding from autoencoders on train data
-df_ae = pd.read_csv("../Data/reduced_trainset_3.csv", header=None)
+df_ae = pd.read_csv("../Data/reduced_trainset_with_BATCH_SIZE_64_NOISE_TYPE_gaussian_NOISE_PERCENTAGE_2_HIDDEN_LAYERS_[620,330,100,13]_LEATNING_RATE_0,002_EPOCH_70.csv", header=None)
 X_train_ae = df_ae.iloc[:,0:].values
 
 # increase the contract of pictures
