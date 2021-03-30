@@ -49,6 +49,7 @@ plt.show()
 
 pca = PCA(n_components=13)
 principalComponents = pca.fit_transform(X_contrast)
+print(pca.explained_variance_ratio_)
 
 # principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2', 'pc3'])
 #
