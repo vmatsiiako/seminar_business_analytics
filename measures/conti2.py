@@ -97,7 +97,7 @@ trust_pca_test = trustworthiness(Q_test, min_k = 1, max_k = 25)
 cont_pca_test = continuity(Q_test, min_k=1, max_k=25)
 print(trust_pca_test)
 print(cont_pca_test)
-
+#
 #measures for ae on train data
 trust_ae = trustworthiness(Q_ae, min_k=1, max_k=25)
 cont_ae = continuity(Q_ae, min_k=1, max_k=25)
@@ -136,7 +136,7 @@ plt.title('pca test data')
 plt.savefig('pca_test_data.png')
 plt.show()
 
-#plotting pca on test data
+#plotting ae on train data
 plt.plot(cont_ae, "-m", label="continuity measure")
 plt.plot(trust_ae, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
@@ -146,7 +146,7 @@ plt.title('ae train data')
 plt.savefig('ae_train_data.png')
 plt.show()
 
-#plotting pca on test data
+#plotting ae on test data
 plt.plot(cont_ae_test, "-m", label="continuity measure")
 plt.plot(trust_ae_test, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
