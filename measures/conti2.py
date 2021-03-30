@@ -61,6 +61,7 @@ princa_test = pca.fit_transform(X_contrast_test)
 new_data = np.hstack((X_contrast, princa))
 new_data_ae = np.hstack((X_contrast, X_train_ae))
 n_train = new_data.shape[0]
+np.random.seed(0)
 random_indices = np.random.choice(n_train, size=13727, replace=False)
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
