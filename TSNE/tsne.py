@@ -33,10 +33,10 @@ princa = pca.fit_transform(X_contrast)
 #TSNE_output = TSNE.fit_transform(princa)
 
 #run tsne on AE
-TSNE = TSNE(n_components=2, perplexity=5)
+TSNE = TSNE(n_components=2, perplexity=5, learning_rate=300)
 TSNE_output = TSNE.fit_transform(X_train_ae)
-n_iter =TSNE_output.n_iter_
-print(n_iter)
+#n_iter =TSNE_output.n_iter_
+#print(n_iter)
 
 #run tsne on full data
 #TSNE = TSNE(n_components=2, perplexity=5)
