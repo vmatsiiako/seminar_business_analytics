@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.manifold import trustworthiness
 from sklearn.manifold import TSNE
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -8,14 +7,13 @@ import matplotlib.pyplot as plt
 import cv2
 import seaborn as sns
 
-# https://scikit-learn.org/stable/modules/generated/sklearn.manifold.trustworthiness.html
+#load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-
 features = df.columns[1:]
 X_train = df.loc[:, features].values
 y_train = df.iloc[:,0].values
 
-# increase the contract of pictures
+# increase the contrast of pictures
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i, :]
