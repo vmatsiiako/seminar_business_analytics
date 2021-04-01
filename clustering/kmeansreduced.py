@@ -1,21 +1,21 @@
 import pandas
 import pandas as pd
 import matplotlib
-from sklearn.metrics import silhouette_score, homogeneity_score, completeness_score, v_measure_score
+from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 import cv2
 matplotlib.use('TkAgg')
-#https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
-#https://towardsdatascience.com/explaining-k-means-clustering-5298dc47bad6
-from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
+
+MAX_BRIGHTNESS = 255
+MEAN = 0.5
+NUMBER_OF_PIXELS = 784
+PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 
-#drop fist signs
+#drop fist signs from the dataframe
 df.drop(df.loc[df['label']==0].index, inplace=True)
 df.drop(df.loc[df['label']==4].index, inplace=True)
 df.drop(df.loc[df['label']==12].index, inplace=True)
@@ -30,13 +30,13 @@ X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize train data
-X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
-X_train = X_train.astype('float32') / 255.0 - 0.5
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-#run kmeans with 24 clusters
+#run kmeans with 19 clusters, as there are 19 letters left in the data
 kmeans = KMeans(init="k-means++", n_clusters=19, n_init=4)
 
 #run k-means on full dataset train
