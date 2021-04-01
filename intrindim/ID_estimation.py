@@ -24,6 +24,6 @@ CD2 = skdim.id.CorrInt(k1=50, k2=80, DM=False).fit_predict(X_contrast)
 EigValue = skdim.id.lPCA(ver='FO', alphaRatio=0.1, alphaFO=0.1, verbose=False, fit_explained_variance=False).fit_predict(X_contrast)
 
 #print the different intrinsic dimensionality estimators
-print(EigValue)
-print(CD1)
-print(CD2)
+print('CD-measure with 30-50 neighbors{}'.format(CD1))
+print('CD-measure with 50-80 neighbors{}'.format(CD2))
+print('Eigen Value ID-Measure{}'.format(EigValue))
