@@ -12,7 +12,6 @@ MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 
-
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
 #df_test = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_test.csv")

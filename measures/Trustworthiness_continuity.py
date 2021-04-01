@@ -2,10 +2,14 @@ import numpy as np
 import cv2
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 import coranking
 import matplotlib.pyplot as plt
 from coranking.metrics import trustworthiness, continuity
+
+MAX_BRIGHTNESS = 255
+MEAN = 0.5
+NUMBER_OF_PIXELS = 784
+PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -30,22 +34,22 @@ X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize train data
-X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
-X_train = X_train.astype('float32') / 255.0 - 0.5
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #contrast test data
 X_contrast_test = np.zeros(np.shape(X_test))
 for i in range(len(X_contrast_test)):
     image = X_test[i,:]
     image = image.astype(np.uint8)
-    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize test data
-X_contrast_test = X_contrast_test.astype('float32') / 255.0 - 0.5
-X_test = X_test.astype('float32') / 255.0 - 0.5
+X_contrast_test = X_contrast_test.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #run PCA with n=13 principal components
 pca = PCA(n_components=13)
