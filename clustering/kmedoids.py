@@ -1,10 +1,14 @@
 import cv2
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 from sklearn_extra.cluster import KMedoids
+
+MAX_BRIGHTNESS = 255
+MEAN = 0.5
+NUMBER_OF_PIXELS = 784
+PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -29,22 +33,22 @@ X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize data
-X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
-X_train = X_train.astype('float32') / 255.0 - 0.5
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #contrast test data
 X_contrast_test = np.zeros(np.shape(X_test))
 for i in range(len(X_contrast_test)):
     image = X_test[i,:]
     image = image.astype(np.uint8)
-    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize data
-X_contrast_test = X_contrast_test.astype('float32') / 255.0 - 0.5
-X_test = X_test.astype('float32') / 255.0 - 0.5
+X_contrast_test = X_contrast_test.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #run PCA with n=13 principal components
 pca = PCA(n_components=13)
