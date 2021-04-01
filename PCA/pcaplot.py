@@ -14,7 +14,7 @@ x = df.loc[:, features].values
 y = df.loc[:,['label']].values
 x = StandardScaler().fit_transform(x)
 
-pca = PCA(n_components=5)
+pca = PCA(n_components=13)
 principalComponents = pca.fit_transform(x)
 #principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2', 'pc3', 'pca4', 'pca5', 'pca6'])
 approximation = pca.inverse_transform(principalComponents)
@@ -32,6 +32,6 @@ plt.title('Original Image', fontsize = 20)
 plt.subplot(1, 2, 2);
 plt.imshow(approximation[3].reshape(28, 28),
               cmap = plt.cm.gray);
-plt.xlabel('5 components', fontsize = 14)
+plt.xlabel('13 components', fontsize = 14)
 plt.title('Reconstructed Image', fontsize = 20)
 plt.show()
