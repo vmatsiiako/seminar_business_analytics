@@ -18,11 +18,12 @@ for i in range(len(X_contrast)):
 
 X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
 
+#compute two different CD estimators for different k and compute the Eigenvalue estimator
 CD1 = skdim.id.CorrInt(k1=30, k2=50, DM=False).fit_predict(X_contrast)
 CD2 = skdim.id.CorrInt(k1=50, k2=80, DM=False).fit_predict(X_contrast)
-#EigValue = skdim.id.lPCA(ver='FO', alphaRatio=0.1, alphaFO=0.1, verbose=False, fit_explained_variance=False).fit_predict(X_contrast)
-#MLE = skdim.id.MLE(dnoise=None, sigma=0, n=None, integral_approximation='Haro', unbiased=False, neighborhood_based=True, K=10).fit_predict(x)
-#print(EigValue)
+EigValue = skdim.id.lPCA(ver='FO', alphaRatio=0.1, alphaFO=0.1, verbose=False, fit_explained_variance=False).fit_predict(X_contrast)
+
+#print the different intrinsic dimensionality estimators
+print(EigValue)
 print(CD1)
 print(CD2)
-#print(MLE)
