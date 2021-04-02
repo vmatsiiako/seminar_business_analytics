@@ -1,4 +1,3 @@
-import pandas
 import pandas as pd
 import matplotlib
 from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
@@ -7,10 +6,10 @@ matplotlib.use('TkAgg')
 import numpy as np
 from sklearn.cluster import KMeans
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -43,6 +42,7 @@ kmeans = KMeans(init="k-means++", n_clusters=19, n_init=4)
 kmeans_full = kmeans.fit(X_contrast)
 labels = kmeans.predict(X_contrast)
 
+#print number of iterations train data
 print('Number of iterations Full Kmeans train data {}'.format(kmeans_full.n_iter_))
 
 #Print scores full train dataset

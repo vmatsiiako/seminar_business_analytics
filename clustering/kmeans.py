@@ -7,10 +7,10 @@ from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -89,12 +89,12 @@ labels_pca_test = kmeans.predict(princa_test)
 kmeans_ae_test = kmeans.fit(X_test_ae)
 labels_ae_test = kmeans.predict(X_test_ae)
 
-#printnumber of iterations train data
+#print number of iterations train data
 print('Number of iterations Full Kmeans train data {}'.format(kmeans_full.n_iter_))
 print('Number of iterations PCA Kmeans train data {}'.format(kmeans_pca.n_iter_))
 print('Number of iterations autoencoder Kmeans train data {}'.format(kmeans_ae.n_iter_))
 
-#printnumber of iterations test data
+#print number of iterations test data
 print('Number of iterations Full Kmeans test data{}'.format(kmeans_full_test.n_iter_))
 print('Number of iterations PCA Kmeans test data {}'.format(kmeans_pca_test.n_iter_))
 print('Number of iterations autoencoder Kmeans test data {}'.format(kmeans_ae_test.n_iter_))
