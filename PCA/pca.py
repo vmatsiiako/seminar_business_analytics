@@ -7,28 +7,27 @@ from sklearn.decomposition import PCA
 import cv2
 import seaborn as sns
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
 
-
-# import and extract the data
+# load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-#df_test = pd.read_csv("/Users/vmatsiiako/Downloads/archive/sign_mnist_test.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
-#X_test = df_test.iloc[:,1:].values
-#y_test = df_test.iloc[:,0].values
 
-# increase the contract of pictures
+#contrast train data
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
-    image = X_train[i, :]
+    image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)/NUMBER_OF_PIXELS - MEAN
-# In case you don't want contrast comment ^ and uncomment next line
-# X_contrast = X_train/NUMBER_OF_PIXELS - MEAN
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
+
+# normalize train data
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 # THIS PART OF THE CODE IS USED FOR VISUALIZING FEATURES' DISTRIBUTION
 # sns.displot(pd.DataFrame(x[:,153]), x=0, binwidth=3)  # If you wanna visualize a distribution of a certain pixel
@@ -49,13 +48,11 @@ plt.show()
 
 pca = PCA(n_components=13)
 principalComponents = pca.fit_transform(X_contrast)
+print(pca.explained_variance_ratio_)
 
 # principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2', 'pc3'])
 #
 # finalDf = pd.concat([principalDf, df[['label']]], axis=1)
-
-#this line creates a csv file of the low-dimensional representation
-#finalDf.to_csv('results.csv', index=False, header=False)
 
 # fig = plt.figure()
 # from mpl_toolkits.mplot3d import Axes3D
@@ -97,8 +94,5 @@ sns.scatterplot(
 )
 plt.show()
 
-print(pca.explained_variance_ratio_)
-
-
-
-#plt.savefig('pca_3d.pdf')
+#Print the explained variance
+print('Explained variance{}'.format(pca.explained_variance_ratio_))

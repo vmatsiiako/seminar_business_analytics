@@ -1,16 +1,16 @@
-import pandas
 import pandas as pd
 import matplotlib
-from sklearn.metrics import silhouette_score, homogeneity_score, completeness_score, v_measure_score
+from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 import cv2
 matplotlib.use('TkAgg')
-#https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
-#https://towardsdatascience.com/explaining-k-means-clustering-5298dc47bad6
 from sklearn.decomposition import PCA
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+#Initialize constants
+MAX_BRIGHTNESS = 255
+MEAN = 0.5
+NUMBER_OF_PIXELS = 784
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -37,11 +37,11 @@ X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
 # normalize train data
-X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
-X_train = X_train.astype('float32') / 255.0 - 0.5
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #contrast test data
 X_contrast_test = np.zeros(np.shape(X_test))
@@ -89,12 +89,12 @@ labels_pca_test = kmeans.predict(princa_test)
 kmeans_ae_test = kmeans.fit(X_test_ae)
 labels_ae_test = kmeans.predict(X_test_ae)
 
-#printnumber of iterations train data
+#print number of iterations train data
 print('Number of iterations Full Kmeans train data {}'.format(kmeans_full.n_iter_))
 print('Number of iterations PCA Kmeans train data {}'.format(kmeans_pca.n_iter_))
 print('Number of iterations autoencoder Kmeans train data {}'.format(kmeans_ae.n_iter_))
 
-#printnumber of iterations test data
+#print number of iterations test data
 print('Number of iterations Full Kmeans test data{}'.format(kmeans_full_test.n_iter_))
 print('Number of iterations PCA Kmeans test data {}'.format(kmeans_pca_test.n_iter_))
 print('Number of iterations autoencoder Kmeans test data {}'.format(kmeans_ae_test.n_iter_))
