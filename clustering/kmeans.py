@@ -1,15 +1,10 @@
-import pandas
 import pandas as pd
 import matplotlib
 from sklearn.metrics import silhouette_score, homogeneity_score, completeness_score, v_measure_score
 import cv2
 matplotlib.use('TkAgg')
-#https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
-#https://towardsdatascience.com/explaining-k-means-clustering-5298dc47bad6
 from sklearn.decomposition import PCA
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
 #load in train data
