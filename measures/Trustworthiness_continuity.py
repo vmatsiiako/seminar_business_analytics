@@ -6,10 +6,10 @@ import coranking
 import matplotlib.pyplot as plt
 from coranking.metrics import trustworthiness, continuity
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -82,26 +82,26 @@ Q_ae_test = coranking.coranking_matrix(X_contrast_test, X_test_ae)
 #calculate and print measures for PCA on train data
 trust_pca = trustworthiness(Q, min_k=1, max_k=25)
 cont_pca = continuity(Q, min_k=1, max_k=25)
-print(trust_pca)
-print(cont_pca)
+print('Trustworthiness measure PCA train data set{}'. format(trust_pca))
+print('Continuity measure measure PCA train data set{}'. format(cont_pca))
 
 #calculate and print measures for pca on test data
 trust_pca_test = trustworthiness(Q_test, min_k = 1, max_k = 25)
 cont_pca_test = continuity(Q_test, min_k=1, max_k=25)
-print(trust_pca_test)
-print(cont_pca_test)
+print('Trustworthiness measure PCA test data set{}'. format(trust_pca_test))
+print('Continuity measure PCA test data set{}'. format(cont_pca_test))
 #
 #calculate and print measures for ae on train data
 trust_ae = trustworthiness(Q_ae, min_k=1, max_k=25)
 cont_ae = continuity(Q_ae, min_k=1, max_k=25)
-print(trust_ae)
-print(cont_ae)
+print('Trustworthiness measure AE train data set{}'. format(trust_ae))
+print('Continuity measure AE train data set{}'. format(cont_ae))
 
 #calculate and print measures for ae on test data
 trust_ae_test = trustworthiness(Q_ae_test, min_k=1, max_k=25)
 cont_ae_test = continuity(Q_ae_test, min_k=1, max_k=25)
-print(trust_ae_test)
-print(cont_ae_test)
+print('Trustworthiness measure AE test data set{}'. format(trust_ae_test))
+print('Continuity measure AE test data set{}'. format(cont_ae_test))
 
 #plot measures for pca on train data
 plt.plot(cont_pca, "-m", label="continuity measure")
