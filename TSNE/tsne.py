@@ -20,6 +20,7 @@ TSNE_output = TSNE.fit_transform(X_train_ae)
 tsneDf = pd.DataFrame(data = TSNE_output)
 finalDf = pd.concat([tsneDf, df[['label']]], axis=1)
 
+#Get the two components
 finalDf['tsne1'] = finalDf.loc[:,0].values
 finalDf['tsne2'] = finalDf.loc[:,1].values
 
