@@ -7,6 +7,7 @@ from sklearn.decomposition import PCA
 import cv2
 import seaborn as sns
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
@@ -93,8 +94,5 @@ sns.scatterplot(
 )
 plt.show()
 
-print(pca.explained_variance_ratio_)
-
-
-
-#plt.savefig('pca_3d.pdf')
+#Print the explained variance
+print('Explained variance{}'.format(pca.explained_variance_ratio_))
