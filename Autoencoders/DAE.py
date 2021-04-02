@@ -9,12 +9,12 @@ class DAE(nn.Module):
         # extract weights from each model
         encoders = []
         encoder_biases = []
-        decoders = []
+        # decoders = []
         decoder_biases = []
         for model in models:
             encoders.append(nn.Parameter(model.W_encoder.clone()))
             encoder_biases.append(nn.Parameter(model.h_bias.clone()))
-            decoders.append(nn.Parameter(model.W_encoder.clone()))
+            # decoders.append(nn.Parameter(model.W_encoder.clone()))
             decoder_biases.append(nn.Parameter(model.h_bias.clone()))
 
         decoder_biases.pop()
@@ -24,7 +24,7 @@ class DAE(nn.Module):
         # build encoders and decoders
         self.encoders = nn.ParameterList(encoders)
         self.encoder_biases = nn.ParameterList(encoder_biases)
-        self.decoders = nn.ParameterList(reversed(decoders))
+        # self.decoders = nn.ParameterList(reversed(decoders))
         self.decoder_biases = nn.ParameterList(decoder_biases)
 
         # # build encoders and decoders based on weights from each
@@ -52,6 +52,7 @@ class DAE(nn.Module):
         """Decode hidden layer"""
         p_h = h
         for i in range(len(self.encoders)):
-            activation = torch.mm(p_h, self.decoders[i].t()) + self.decoder_biases[i]
+            # activation = torch.mm(p_h, self.decoders[i].t()) + self.decoder_biases[i]
+            activation = torch.mm(p_h, self.encoders[len(self.encoders) - 1 -i].t()) + self.decoder_biases[i]
             p_h = torch.sigmoid(activation)
         return activation
