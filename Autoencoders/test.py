@@ -5,6 +5,7 @@ import numpy as np
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import torch.nn as nn
 import torch
 import cv2
 from torch.utils.data import DataLoader, TensorDataset
@@ -189,3 +190,10 @@ plt.savefig(f"features_captured_with_noise"
       f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
       f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
       f"_EPOCH_{str(optimal_epoch)}")
+
+loss = nn.MSELoss()
+final_training_loss = 0
+for k, features in enumerate(visualize_test):
+    batch_loss = loss(features[0], autoencoder(features[0]))
+    final_training_loss += batch_loss
+print(final_training_loss/len(visualize_test))
