@@ -1,11 +1,16 @@
 import pandas as pd
 import matplotlib
-from sklearn.metrics import silhouette_score, homogeneity_score, completeness_score, v_measure_score
+from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 import cv2
 matplotlib.use('TkAgg')
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans
+
+MAX_BRIGHTNESS = 255
+MEAN = 0.5
+NUMBER_OF_PIXELS = 784
+PICTURE_DIMENSION = 28
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -32,11 +37,11 @@ X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
 # normalize train data
-X_contrast = X_contrast.astype('float32') / 255.0 - 0.5
-X_train = X_train.astype('float32') / 255.0 - 0.5
+X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #contrast test data
 X_contrast_test = np.zeros(np.shape(X_test))
