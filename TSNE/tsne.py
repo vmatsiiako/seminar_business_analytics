@@ -1,9 +1,6 @@
-import numpy as np
 from sklearn.manifold import TSNE
 import pandas as pd
-from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-import cv2
 import seaborn as sns
 
 #load in train data set
