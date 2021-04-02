@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 import skdim
 
+#Initialize constants
 MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -21,6 +21,7 @@ for i in range(len(X_contrast)):
     image = image.astype(np.uint8)
     X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
+#Normalize data
 X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #compute two different CD estimators for different k and compute the Eigenvalue estimator
