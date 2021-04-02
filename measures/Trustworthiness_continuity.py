@@ -90,7 +90,7 @@ trust_pca_test = trustworthiness(Q_test, min_k = 1, max_k = 25)
 cont_pca_test = continuity(Q_test, min_k=1, max_k=25)
 print('Trustworthiness measure PCA test data set{}'. format(trust_pca_test))
 print('Continuity measure PCA test data set{}'. format(cont_pca_test))
-#
+
 #calculate and print measures for ae on train data
 trust_ae = trustworthiness(Q_ae, min_k=1, max_k=25)
 cont_ae = continuity(Q_ae, min_k=1, max_k=25)
