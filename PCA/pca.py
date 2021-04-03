@@ -31,18 +31,18 @@ X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 # THIS PART OF THE CODE IS USED FOR VISUALIZING FEATURES' DISTRIBUTION
 # sns.displot(pd.DataFrame(x[:,153]), x=0, binwidth=3)  # If you wanna visualize a distribution of a certain pixel
-sns.displot(X_train, x=0, binwidth=3)   # If you wanna visualize the distribution of a certain picture
-plt.xlim(0, MAX_BRIGHTNESS)
-plt.show()
+#sns.displot(X_train, x=0, binwidth=3)   # If you wanna visualize the distribution of a certain picture
+#plt.xlim(0, MAX_BRIGHTNESS)
+#plt.show()
 
 # This is the code for visualizing the average picture
-plt.figure(figsize=(4, 4))
+#plt.figure(figsize=(4, 4))
 # Display original
-ax = plt.subplot(1, 1, 1)
-plt.imshow(X_train[0].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-plt.gray()
-ax.get_xaxis().set_visible(False)
-ax.get_yaxis().set_visible(False)
+#ax = plt.subplot(1, 1, 1)
+#plt.imshow(X_train[0].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+#plt.gray()
+#ax.get_xaxis().set_visible(False)
+#ax.get_yaxis().set_visible(False)
 plt.show()
 # plt.savefig('average_picture_contrast.pdf')
 
@@ -84,9 +84,10 @@ finalDf = pd.concat([principalDf, df[['label']]], axis=1)
 #finalDf['pc1'] = finalDf.loc[:,0].values
 #finalDf['pc2'] = finalDf.loc[:,1].values
 
-plt.figure(figsize=(16,10))
+plt.figure(figsize=(16,8))
+plt.title("2-component PCA")
 sns.scatterplot(
-    x="pc1", y="pc2",
+    x='pc1', y='pc2',
     hue = y_train,
     palette=sns.color_palette("hls", 24),
     data=finalDf,
