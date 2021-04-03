@@ -63,22 +63,25 @@ princa_test = pca.fit_transform(X_contrast_test)
 new_data = np.hstack((X_contrast, princa))
 new_data_ae = np.hstack((X_contrast, X_train_ae))
 n_train = new_data.shape[0]
+n_train_ae = new_data_ae.shape[0]
 
 #fix a random seed and get a list of random indices with size equal to half the train data size
 np.random.seed(0)
 random_indices = np.random.choice(n_train, size=13727, replace=False)
+random_indices_ae = np.random.choice(n_train_ae, size=13727, replace=False)
 
 #get a random sample of both numpy arrays and split them in two again
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
-random_ae_sample = new_data_ae[random_indices, :]
+random_ae_sample = new_data_ae[random_indices_ae, :]
+full_random_2 = random_ae_sample[:,13:]
 ae_random = random_ae_sample[:, :12]
 
 #calculate coranking matrices
 Q = coranking.coranking_matrix(full_random, pca_random)
 Q_test = coranking.coranking_matrix(X_contrast_test, princa_test)
-Q_ae = coranking.coranking_matrix(full_random, ae_random)
+Q_ae = coranking.coranking_matrix(full_random_2, ae_random)
 Q_ae_test = coranking.coranking_matrix(X_contrast_test, X_test_ae)
 
 #calculate and print measures for PCA on train data
