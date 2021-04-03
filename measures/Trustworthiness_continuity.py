@@ -70,10 +70,12 @@ np.random.seed(0)
 random_indices = np.random.choice(n_train, size=13727, replace=False)
 random_indices_ae = np.random.choice(n_train_ae, size=13727, replace=False)
 
-#get a random sample of both numpy arrays and split them in two again
+#create the random subsample for the pca measures
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
+
+#create the random subsample for the autoencoders measures
 random_ae_sample = new_data_ae[random_indices_ae, :]
 full_random_2 = random_ae_sample[:,13:]
 ae_random = random_ae_sample[:, :12]
