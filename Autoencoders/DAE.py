@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class DAE(nn.Module):
     def __init__(self, models):
-        """Create a deep autoencoder based on a list of RBM models"""
+        """Create a deep autoencoder based on a list of stacked denoise autoencoder models"""
         super(DAE, self).__init__()
 
         # extract weights from each model
