@@ -27,7 +27,7 @@ finalDf['tsne1'] = finalDf.loc[:,0].values
 finalDf['tsne2'] = finalDf.loc[:,1].values
 
 #create a two-dimensional plot of the t-SNE results
-plt.figure(figsize=(16,8))
+plt.figure(figsize=(18,10))
 plt.title("2-component t-SNE")
 sns.scatterplot(
     x="tsne1", y="tsne2",
