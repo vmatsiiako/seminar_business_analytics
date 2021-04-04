@@ -84,7 +84,7 @@ finalDf = pd.concat([principalDf, df[['label']]], axis=1)
 #finalDf['pc1'] = finalDf.loc[:,0].values
 #finalDf['pc2'] = finalDf.loc[:,1].values
 
-plt.figure(figsize=(18,10))
+plt.figure(figsize=(18,12))
 plt.title("2-component PCA")
 sns.scatterplot(
     x='pc1', y='pc2',
