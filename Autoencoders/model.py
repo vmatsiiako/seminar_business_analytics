@@ -14,8 +14,8 @@ class Model(nn.Module):
     def fit(self,
             PRETRAINING_NOISE_TYPE,
             PRETRAINING_NOISE_PARAMETER,
-            FINETUNING_NOISE_TYPE,
-            FINETUNING_NOISE_PARAMETER,
+            FINETUNING_NOISE_TYPE,      # ONLY FOR DENOISING DEEP AUTOENCODER
+            FINETUNING_NOISE_PARAMETER, # ONLY FOR DENOISING DEEP AUTOENCODER
             BATCH_SIZE,
             HIDDEN_LAYERS,
             X_train_clean,
@@ -25,131 +25,113 @@ class Model(nn.Module):
             LEARNING_RATE,
             NUMBER_OF_PIXELS=784):
 
-        # construct the noised train set for pretraining
-        # X_pretrain_noise = np.zeros(np.shape(X_train_clean))
-        # for i in range(len(X_train_clean)):
-        #     X_pretrain_noise[i] = add_noise(X_train_clean[i, :], noise_type=PRETRAINING_NOISE_TYPE, parameter=PRETRAINING_NOISE_PARAMETER)
-        # X_train_clean_tensor = torch.Tensor(X_train_clean)
-        # X_pretrain_noise = torch.Tensor(X_pretrain_noise)
-        #
-        # ds_clean = TensorDataset(X_train_clean_tensor)
-        # pretrain_ds_noise = TensorDataset(X_pretrain_noise)
-        # dl_clean = DataLoader(ds_clean, batch_size=BATCH_SIZE, shuffle=False)
-        # pretrain_dl_noise = DataLoader(pretrain_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
-
-        # train_ds_clean = TensorDataset(X_train_clean)
-        # train_ds_noise = TensorDataset(X_train_noise)
-        # validation_ds = TensorDataset(X_validation_clean)
-        # train_dl_clean = DataLoader(train_ds_clean, batch_size=BATCH_SIZE, shuffle=False)
-        # train_dl_noise = DataLoader(train_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
-        # validation_dl = DataLoader(validation_ds, batch_size=BATCH_SIZE, shuffle=False)
+        # Initialize the list of pretrained models to an empty list
         models = []
         visible_dim = NUMBER_OF_PIXELS
-        new_data = X_train_clean
-        # dae_train_dl_corrupted = pretrain_dl_noise
+
+        # Initialize the data that are used to train the stacked denoising autoencoders to be the original observations
+        pretrain_data_clean = X_train_clean
+
+        # Pre-training - Loop over all hidden layers
         for hidden_dim in HIDDEN_LAYERS:
 
-            # train d_DAE
+            # Initialize the denoising autoencoder, the loss criterion and the optimizer
             dae = d_DAE(visible_dim=visible_dim, hidden_dim=hidden_dim)
             criterion = nn.MSELoss()
             optimizer = torch.optim.Adam(dae.parameters(), lr=0.01, weight_decay=1e-5)
 
-            # l = len(dae_train_dl_clean)
-            # losslist = list()
+
             epoch_loss = 0
             running_loss = 0
-            # dataset_previous_layer_batched = []
-            # for i, features in tqdm(enumerate(dae_train_dl_clean)):
-            #     dataset_previous_layer_batched.append(features[0])
 
+            # Pretraining epochs
             for epoch in range(EPOCHS_PRETRAINING):
-                # construct the noised train set for pretraining
-                X_pretrain_noise = np.zeros(np.shape(new_data))
-                for i in range(len(new_data)):
-                    X_pretrain_noise[i] = add_noise(new_data[i, :], noise_type=PRETRAINING_NOISE_TYPE,
+                # Construct the noised dataset
+                pretrain_data_noise = np.zeros(np.shape(pretrain_data_clean))
+                for i in range(len(pretrain_data_clean)):
+                    pretrain_data_noise[i] = add_noise(pretrain_data_clean[i, :], noise_type=PRETRAINING_NOISE_TYPE,
                                                     parameter=PRETRAINING_NOISE_PARAMETER)
-                X_train_clean_tensor = torch.Tensor(new_data)
-                X_pretrain_noise = torch.Tensor(X_pretrain_noise)
 
-                ds_clean = TensorDataset(X_train_clean_tensor)
-                pretrain_ds_noise = TensorDataset(X_pretrain_noise)
+                # Transform clean and noised numpy arrays into Tensors
+                pretrain_clean_tensor = torch.Tensor(pretrain_data_clean)
+                pretrain_noise_tensor = torch.Tensor(pretrain_data_noise)
+
+                # Construct the clean and noised Tensor Datasets
+                ds_clean = TensorDataset(pretrain_clean_tensor)
+                pretrain_ds_noise = TensorDataset(pretrain_noise_tensor)
+
+                # Create the clean and noised DataLoaders
                 dae_train_dl_clean = DataLoader(ds_clean, batch_size=BATCH_SIZE, shuffle=False)
                 dae_train_dl_corrupted = DataLoader(pretrain_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
 
-                # dae_train_dl_clean = dl_clean
-                # dae_train_dl_corrupted = pretrain_dl_noise
-
+                # Create an iterator for the clean DataLoader to be able to access its elements using indexes
                 dataloader_iterator = iter(dae_train_dl_clean)
+
+                # Print the epoch to keep truck of the training process
                 print("Pretraining Epoch #", epoch)
+
+                # Loop over all batches
                 for i, features in tqdm(enumerate(dae_train_dl_corrupted)):
-                    # -----------------Forward Pass----------------------
+                    # Forward pass
                     output = dae(features[0])
-                    # loss = criterion(output, dataset_previous_layer_batched[i])
+
+                    # Compute the loss comparin the output the the clean dataset
                     loss = criterion(output, next(dataloader_iterator)[0])
-                    # -----------------Backward Pass---------------------
+
+                    # Backward Pass
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
 
+                    # Update the losses
                     running_loss += loss.item()
                     epoch_loss += loss.item()
                     # -----------------Log-------------------------------
             # losslist.append(running_loss / l)
 
+            # Append the pretrained weights and biases
             models.append(dae)
-            # rederive new data loader based on hidden activations of trained model
-            new_data = np.array([dae.encode(data_list[0])[0].detach().numpy() for data_list in dae_train_dl_corrupted])
 
-            # new_data_corrupted = np.zeros(np.shape(new_data))
-            #
-            # for i in range(len(new_data)):
-            #     new_data_corrupted[i] = add_noise(new_data[i, :], noise_type=PRETRAINING_NOISE_TYPE, parameter=PRETRAINING_NOISE_PARAMETER)
-            #
-            # new_data_corrupted = torch.Tensor(new_data_corrupted)
-            # dae_train_dl_clean = DataLoader(TensorDataset(torch.Tensor(new_data)), batch_size=BATCH_SIZE, shuffle=False)
-            # dae_train_dl_corrupted = DataLoader(TensorDataset(torch.Tensor(new_data_corrupted)), batch_size=BATCH_SIZE,
-            #                                     shuffle=False)
+            # Derive the new data based on hidden activations of trained model
+            pretrain_data_clean = np.array([dae.encode(data_list[0])[0].detach().numpy() for data_list in dae_train_dl_corrupted])
+
+            # Update the visible dimension for the new layer
             visible_dim = hidden_dim
 
-        # fine-tune autoencoder
+        # Initialize the final Deep Autoencoder using the pre-trained layers
         ae = DAE(models)
         optimizer = torch.optim.Adam(ae.parameters(), lr=LEARNING_RATE)
         loss = nn.MSELoss()
 
-        # construct the noised train set for pretraining
-        # X_finetuning_noise = np.zeros(np.shape(X_train_clean))
-        # for i in range(len(X_train_clean)):
-        #     X_finetuning_noise[i] = add_noise(X_train_clean[i, :], noise_type=FINETUNING_NOISE_TYPE,
-        #                                     parameter=FINETUNING_NOISE_PARAMETER)
-        # X_finetuning_noise = torch.Tensor(X_finetuning_noise)
-        #
-        # finetuning_ds_noise = TensorDataset(X_finetuning_noise)
-        # finetuning_dl_noise = DataLoader(finetuning_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
-        # X_validation_clean = torch.Tensor(X_validation_clean)
-        # validation_ds = TensorDataset(X_validation_clean)
-        # validation_dl = DataLoader(validation_ds, batch_size=BATCH_SIZE, shuffle=False)
-
+        # Initialize the vector to store the validation and training losses
         val_loss = np.zeros((EPOCHS_FINETUNING))
         final_train_loss = np.zeros((EPOCHS_FINETUNING))
-        # final_train_loss = []
 
+        # Transform the clean input and the validation set into Tensors
         X_train_clean_tensor = torch.Tensor(X_train_clean)
-        ds_clean = TensorDataset(X_train_clean_tensor)
-        dl_clean = DataLoader(ds_clean, batch_size=BATCH_SIZE, shuffle=False)
-
         X_validation_clean = torch.Tensor(X_validation_clean)
+
+        # Construct the clean input and validation Tensor Datasets
+        ds_clean = TensorDataset(X_train_clean_tensor)
         validation_ds = TensorDataset(X_validation_clean)
+
+        # Create the clean and noised DataLoaders
+        dl_clean = DataLoader(ds_clean, batch_size=BATCH_SIZE, shuffle=False)
         validation_dl = DataLoader(validation_ds, batch_size=BATCH_SIZE, shuffle=False)
 
+        # Fine-tuning - Loop over all fine-tuning epochs
         for epoch in range(EPOCHS_FINETUNING):
+            # Print the epoch to keep truck of the training process
             print(f"Fine_tuning_Epoch{str(epoch)}")
 
+            # Construct the noised dataset (ONLY FOR DENOISING DEEP AUTOENCODER)
             X_finetuning_noise = np.zeros(np.shape(X_train_clean))
             for i in range(len(X_train_clean)):
                 X_finetuning_noise[i] = add_noise(X_train_clean[i, :], noise_type=FINETUNING_NOISE_TYPE,
                                                   parameter=FINETUNING_NOISE_PARAMETER)
             X_finetuning_noise = torch.Tensor(X_finetuning_noise)
 
+            # Construct the noised Data Loader (ONLY FOR DENOISING DEEP AUTOENCODER)
             finetuning_ds_noise = TensorDataset(X_finetuning_noise)
             finetuning_dl_noise = DataLoader(finetuning_ds_noise, batch_size=BATCH_SIZE, shuffle=False)
 
@@ -157,12 +139,15 @@ class Model(nn.Module):
             epoch_loss = 0
             validation_epoch_loss = 0
             final_training_loss = 0
-            dataloader_iterator_ae = iter(dl_clean)   #comment out to not have noise
-            # for i, features in enumerate(train_dl_clean):
-            for i, features in enumerate(finetuning_dl_noise):   #comment out to not have noise
-                output = ae(features[0])    #comment out to not have noise
-                # batch_loss = loss(features[0], ae(features[0]))
-                batch_loss = loss(output, next(dataloader_iterator_ae)[0])  #comment out to not have noise
+
+            # Create an iterator for the clean DataLoader to be able to access its elements using indexes
+            dataloader_iterator_ae = iter(dl_clean)   # ONLY FOR DENOISING DEEP AUTOENCODER
+
+            # for i, features in enumerate(dl_clean): # Comment in for normal Deep Autoencoder
+            for i, features in enumerate(finetuning_dl_noise):   # ONLY FOR DENOISING DEEP AUTOENCODER
+                output = ae(features[0])    # ONLY FOR DENOISING DEEP AUTOENCODER
+                # batch_loss = loss(features[0], ae(features[0])) # Comment in for normal Deep Autoencoder
+                batch_loss = loss(output, next(dataloader_iterator_ae)[0])  # ONLY FOR DENOISING DEEP AUTOENCODER
                 optimizer.zero_grad()
                 batch_loss.backward()
                 optimizer.step()
