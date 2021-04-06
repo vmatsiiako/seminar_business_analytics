@@ -21,7 +21,8 @@ df_ae_deep = pd.read_csv("../Data/FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_r
 X_train_ae_deep = df_ae_deep.iloc[:,0:].values
 
 #load in embedding from denoised autoencoders on train data
-
+df_ae_denoised = pd.read_csv("../Data/FINAL_DENOISING_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_32.csv", header=None)
+X_train_ae_denoised = df_ae_denoised.iloc[:,0:].values
 
 #load in test data
 df_test = pd.read_csv("../Data/sign_mnist_test.csv")[1500:]
@@ -33,6 +34,8 @@ df_test_ae_deep = pd.read_csv("../Data/FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FI
 X_test_ae_deep = df_test_ae_deep.iloc[:,0:].values
 
 #load in embedding from denoised autoencoders on test data
+df_test_ae_denoised = pd.read_csv("../Data/FINAL_DENOISING_reduced_test_set_with_noise_BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_32.csv", header=None)
+X_test_ae_denoised = df_ae_denoised.iloc[:,0:].values
 
 #contrast train data
 X_contrast = np.zeros(np.shape(X_train))
