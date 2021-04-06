@@ -129,14 +129,14 @@ print('Continuity measure PCA test data set{}'. format(cont_pca_test))
 #calculate and print measures for denoised ae on train data
 trust_ae_denoised = trustworthiness(Q_ae_denoised, min_k=1, max_k=25)
 cont_ae_denoised = continuity(Q_ae_denoised, min_k=1, max_k=25)
-print('Trustworthiness measure denoised AE train data set{}'. format(trust_ae))
-print('Continuity measure denoised AE train data set{}'. format(cont_ae))
+print('Trustworthiness measure denoised AE train data set{}'. format(trust_ae_denoised))
+print('Continuity measure denoised AE train data set{}'. format(cont_ae_denoised))
 
 #calculate and print measures for denoised ae on test data
 trust_ae_test_denoised = trustworthiness(Q_ae_test_denoised, min_k=1, max_k=25)
 cont_ae_test_denoised = continuity(Q_ae_test_denoised, min_k=1, max_k=25)
-print('Trustworthiness measure denoised AE test data set{}'. format(trust_ae_test))
-print('Continuity measure denoised AE test data set{}'. format(cont_ae_test))
+print('Trustworthiness measure denoised AE test data set{}'. format(trust_ae_test_denoised))
+print('Continuity measure denoised AE test data set{}'. format(cont_ae_test_denoised))
 
 #plot measures for pca on train data
 plt.plot(cont_pca, "-m", label="continuity measure")
