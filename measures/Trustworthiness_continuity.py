@@ -16,20 +16,23 @@ df = pd.read_csv("../Data/sign_mnist_train.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
-#load in embedding from autoencoders on train data
-#df_ae = pd.read_csv("../Data/reduced_trainset_with_BATCH_SIZE_64_NOISE_TYPE_gaussian_NOISE_PERCENTAGE_2_HIDDEN_LAYERS_[620,330,100,13]_LEATNING_RATE_0,002_EPOCH_70.csv", header=None)
-df_ae = pd.read_csv("../Data/reduced_trainset_with_noise__BATCH_SIZE_32_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_2_F_NOISE_TYPE_zeros_F_NOISE_PERCENTAGE_0,2_LAYERS_[620,330,13]_LR_0,002_EPOCH_20.csv", header=None)
-X_train_ae = df_ae.iloc[:,0:].values
+#load in embedding from deep autoencoders on train data
+df_ae_deep = pd.read_csv("../Data/FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
+X_train_ae_deep = df_ae_deep.iloc[:,0:].values
+
+#load in embedding from deep denoised autoencoders on train data
+
 
 #load in test data
-df_test = pd.read_csv("../Data/sign_mnist_test.csv")
+df_test = pd.read_csv("../Data/sign_mnist_test.csv")[1500:]
 X_test = df_test.iloc[:,1:].values
 y_test = df_test.iloc[:,0].values
 
-#load in embedding from autoencoders on test data
-#df_test_ae = pd.read_csv("../Data/reduced_test_set_with_BATCH_SIZE_64_NOISE_TYPE_gaussian_NOISE_PERCENTAGE_2_HIDDEN_LAYERS_[620,330,100,13]_LEATNING_RATE_0,002_EPOCH_70.csv", header=None)
-df_test_ae = pd.read_csv("../Data/reduced_test_set_with_noise_BATCH_SIZE_32_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_2_F_NOISE_TYPE_zeros_F_NOISE_PERCENTAGE_0,2_LAYERS_[620,330,13]_LR_0,002_EPOCH_20.csv", header=None)
-X_test_ae = df_test_ae.iloc[:,0:].values
+#load in embedding from deep autoencoders on test data
+df_test_ae_deep = pd.read_csv("../Data/FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_test_set_with_noise_BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
+X_test_ae_deep = df_test_ae_deep.iloc[:,0:].values
+
+#load in embedding from denoised autoencoders on test data
 
 #contrast train data
 X_contrast = np.zeros(np.shape(X_train))
@@ -61,21 +64,29 @@ princa_test = pca.fit_transform(X_contrast_test)
 #pick random subsample to calculate the measures for for the train data
 #we first create numpy arrays with the original data and embeddings together
 new_data = np.hstack((X_contrast, princa))
-new_data_ae = np.hstack((X_contrast, X_train_ae))
+new_data_ae_deep = np.hstack((X_contrast, X_train_ae_deep))
+new_data_ae_denoised = np.hstack((X_contrast, X_train_ae_denoised))
 n_train = new_data.shape[0]
-n_train_ae = new_data_ae.shape[0]
+n_train_ae_deep = new_data_ae_deep.shape[0]
+n_train_ae_denoised = new_data_ae_denoised.shape[0]
 
 #fix a random seed and get a list of random indices with size equal to half the train data size
 np.random.seed(0)
 random_indices = np.random.choice(n_train, size=13727, replace=False)
-random_indices_ae = np.random.choice(n_train_ae, size=13727, replace=False)
+random_indices_ae = np.random.choice(n_train_ae_deep, size=13727, replace=False)
+random_indices_ae_denoised = np.random.choice(n_train_ae_denoised, size=13727, replace=False)
 
 #create the random subsample for the pca measures
 random_sample = new_data[random_indices, :]
 full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
 
-#create the random subsample for the autoencoders measures
+#create the random subsample for the deep autoencoders measures
+random_ae_sample = new_data_ae[random_indices_ae, :]
+full_random_2 = random_ae_sample[:,13:]
+ae_random = random_ae_sample[:, :12]
+
+#create the random subsample for the deep autoencoders measures
 random_ae_sample = new_data_ae[random_indices_ae, :]
 full_random_2 = random_ae_sample[:,13:]
 ae_random = random_ae_sample[:, :12]
