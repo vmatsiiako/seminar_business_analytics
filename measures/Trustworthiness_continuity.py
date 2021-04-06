@@ -20,7 +20,7 @@ y_train = df.iloc[:,0].values
 df_ae_deep = pd.read_csv("../Data/FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
 X_train_ae_deep = df_ae_deep.iloc[:,0:].values
 
-#load in embedding from deep denoised autoencoders on train data
+#load in embedding from denoised autoencoders on train data
 
 
 #load in test data
@@ -82,20 +82,22 @@ full_random = random_sample[:,13:]
 pca_random = random_sample[:,:12]
 
 #create the random subsample for the deep autoencoders measures
-random_ae_sample = new_data_ae[random_indices_ae, :]
+random_ae_sample = new_data_ae_deep[random_indices_ae, :]
 full_random_2 = random_ae_sample[:,13:]
 ae_random = random_ae_sample[:, :12]
 
-#create the random subsample for the deep autoencoders measures
-random_ae_sample = new_data_ae[random_indices_ae, :]
-full_random_2 = random_ae_sample[:,13:]
-ae_random = random_ae_sample[:, :12]
+#create the random subsample for the denoised autoencoders measures
+random_ae_sample_denoised = new_data_ae_denoised[random_indices_ae_denoised, :]
+full_random_3 = random_ae_sample_denoised[:,13:]
+ae_random_denoised = random_ae_sample_denoised[:, :12]
 
 #calculate coranking matrices
 Q = coranking.coranking_matrix(full_random, pca_random)
 Q_test = coranking.coranking_matrix(X_contrast_test, princa_test)
 Q_ae = coranking.coranking_matrix(full_random_2, ae_random)
-Q_ae_test = coranking.coranking_matrix(X_contrast_test, X_test_ae)
+Q_ae_test = coranking.coranking_matrix(X_contrast_test, X_test_ae_deep)
+Q_ae_denoised = coranking.coranking_matrix(full_random_3, ae_random_denoised)
+Q_ae_test_denoised = coranking.coranking_matrix(X_contrast_test, X_test_ae_denoised)
 
 #calculate and print measures for PCA on train data
 trust_pca = trustworthiness(Q, min_k=1, max_k=25)
@@ -109,17 +111,29 @@ cont_pca_test = continuity(Q_test, min_k=1, max_k=25)
 print('Trustworthiness measure PCA test data set{}'. format(trust_pca_test))
 print('Continuity measure PCA test data set{}'. format(cont_pca_test))
 
-#calculate and print measures for ae on train data
+#calculate and print measures for deep ae on train data
 trust_ae = trustworthiness(Q_ae, min_k=1, max_k=25)
 cont_ae = continuity(Q_ae, min_k=1, max_k=25)
-print('Trustworthiness measure AE train data set{}'. format(trust_ae))
-print('Continuity measure AE train data set{}'. format(cont_ae))
+print('Trustworthiness measure deep AE train data set{}'. format(trust_ae))
+print('Continuity measure deep AE train data set{}'. format(cont_ae))
 
-#calculate and print measures for ae on test data
+#calculate and print measures for deep ae on test data
 trust_ae_test = trustworthiness(Q_ae_test, min_k=1, max_k=25)
 cont_ae_test = continuity(Q_ae_test, min_k=1, max_k=25)
-print('Trustworthiness measure AE test data set{}'. format(trust_ae_test))
-print('Continuity measure AE test data set{}'. format(cont_ae_test))
+print('Trustworthiness measure deep AE test data set{}'. format(trust_ae_test))
+print('Continuity measure deep AE test data set{}'. format(cont_ae_test))
+
+#calculate and print measures for denoised ae on train data
+trust_ae_denoised = trustworthiness(Q_ae_denoised, min_k=1, max_k=25)
+cont_ae_denoised = continuity(Q_ae_denoised, min_k=1, max_k=25)
+print('Trustworthiness measure denoised AE train data set{}'. format(trust_ae))
+print('Continuity measure denoised AE train data set{}'. format(cont_ae))
+
+#calculate and print measures for denoised ae on test data
+trust_ae_test_denoised = trustworthiness(Q_ae_test_denoised, min_k=1, max_k=25)
+cont_ae_test_denoised = continuity(Q_ae_test_denoised, min_k=1, max_k=25)
+print('Trustworthiness measure denoised AE test data set{}'. format(trust_ae_test))
+print('Continuity measure denoised AE test data set{}'. format(cont_ae_test))
 
 #plot measures for pca on train data
 plt.plot(cont_pca, "-m", label="continuity measure")
@@ -141,22 +155,42 @@ plt.title('Trustworthiness and continuity for PCA on test data')
 plt.savefig('pca_test_data.png')
 plt.show()
 
-#plot measures for AE on train data
+#plot measures for deep AE on train data
 plt.plot(cont_ae, "-m", label="continuity measure")
 plt.plot(trust_ae, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.title('Trustworthiness and continuity for autoencoders on training data')
+plt.title('Trustworthiness and continuity for deep autoencoders on training data')
 plt.savefig('ae_train_data.png')
 plt.show()
 
-#plot measures for AE on test data
+#plot measures for deep AE on test data
 plt.plot(cont_ae_test, "-m", label="continuity measure")
 plt.plot(trust_ae_test, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
-plt.title('Trustworthiness and continuity for autoencoders on test data')
+plt.title('Trustworthiness and continuity for deep autoencoders on test data')
 plt.savefig('ae_test_data.png')
+plt.show()
+
+#plot measures for denoised AE on train data
+plt.plot(cont_ae_denoised, "-m", label="continuity measure")
+plt.plot(trust_ae_denoised, "-c", label="trustworthiness measure")
+plt.legend(loc="upper right")
+plt.xlabel('Number of Neighbors')
+plt.ylabel('Measure')
+plt.title('Trustworthiness and continuity for denoised autoencoders on training data')
+plt.savefig('ae_train_data_denoised.png')
+plt.show()
+
+#plot measures for denoised AE on test data
+plt.plot(cont_ae_test_denoised, "-m", label="continuity measure")
+plt.plot(trust_ae_test_denoised, "-c", label="trustworthiness measure")
+plt.legend(loc="upper right")
+plt.xlabel('Number of Neighbors')
+plt.ylabel('Measure')
+plt.title('Trustworthiness and continuity for denoised autoencoders on test data')
+plt.savefig('ae_test_data_denoised.png')
 plt.show()
