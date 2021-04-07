@@ -17,29 +17,33 @@ df = pd.read_csv("../Data/sign_mnist_train.csv")
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
-#load in embedding from autoencoders on train data
-#df_ae = pd.read_csv("../Data/reduced_trainset_3.csv", header=None)
-#df_ae = pd.read_csv("../Data/reduced_trainset_with_BATCH_SIZE_64_NOISE_TYPE_gaussian_NOISE_PERCENTAGE_2_HIDDEN_LAYERS_[620,330,100,13]_LEATNING_RATE_0,002_EPOCH_70.csv", header=None)
-df_ae = pd.read_csv("../Data/reduced_trainset_with_noise__BATCH_SIZE_32_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_2_F_NOISE_TYPE_zeros_F_NOISE_PERCENTAGE_0,2_LAYERS_[620,330,13]_LR_0,002_EPOCH_20.csv", header=None)
-X_train_ae = df_ae.iloc[:,0:].values
+#load in embedding from deep autoencoders on train data
+df_ae_deep = pd.read_csv("../Data/TEST_FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
+X_train_ae_deep = df_ae_deep.iloc[:,0:].values
+
+#load in embedding from denoised autoencoders on train data
+df_ae_denoised = pd.read_csv("../Data/FINAL_DENOISING_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_32.csv", header=None)
+X_train_ae_denoised = df_ae_denoised.iloc[:,0:].values
 
 #load in test data
-df_test = pd.read_csv("../Data/sign_mnist_test.csv")
+df_test = pd.read_csv("../Data/sign_mnist_test.csv")[1500:]
 X_test = df_test.iloc[:,1:].values
 y_test = df_test.iloc[:,0].values
 
-#load in embedding from autoencoders on test data
-#df_test_ae = pd.read_csv("../Data/reduced_testset_3.csv", header=None)
-#df_test_ae = pd.read_csv("../Data/reduced_test_set_with_BATCH_SIZE_64_NOISE_TYPE_gaussian_NOISE_PERCENTAGE_2_HIDDEN_LAYERS_[620,330,100,13]_LEATNING_RATE_0,002_EPOCH_70.csv", header=None)
-df_test_ae = pd.read_csv("../Data/reduced_test_set_with_noise_BATCH_SIZE_32_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_2_F_NOISE_TYPE_zeros_F_NOISE_PERCENTAGE_0,2_LAYERS_[620,330,13]_LR_0,002_EPOCH_20.csv", header=None)
-X_test_ae = df_test_ae.iloc[:,0:].values
+#load in embedding from deep autoencoders on test data
+df_test_ae_deep = pd.read_csv("../Data/TEST_FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_test_set_with_noise_BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
+X_test_ae_deep = df_test_ae_deep.iloc[:,0:].values
+
+#load in embedding from denoised autoencoders on test data
+df_test_ae_denoised = pd.read_csv("../Data/FINAL_DENOISING_reduced_test_set_with_noise_BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_32.csv", header=None)
+X_test_ae_denoised = df_test_ae_denoised.iloc[:,0:].values
 
 #contrast train data
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
     image = X_train[i,:]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize train data
 X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
@@ -50,11 +54,11 @@ X_contrast_test = np.zeros(np.shape(X_test))
 for i in range(len(X_contrast_test)):
     image = X_test[i,:]
     image = image.astype(np.uint8)
-    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,784)
+    X_contrast_test[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
 
 # normalize test data
-X_contrast_test = X_contrast_test.astype('float32') / 255.0 - 0.5
-X_test = X_test.astype('float32') / 255.0 - 0.5
+X_contrast_test = X_contrast_test.astype('float32') / MAX_BRIGHTNESS - MEAN
+X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #run PCA with n=13 principal components on training set
 pca = PCA(n_components=13)
@@ -67,7 +71,7 @@ princa_test = pca.fit_transform(X_contrast_test)
 #run kmeans with 24 clusters
 kmeans = KMeans(init="k-means++", n_clusters=24, n_init=4)
 
-#run k-means on full dataset train
+#run k-means on full train dataset
 kmeans_full = kmeans.fit(X_contrast)
 labels = kmeans.predict(X_contrast)
 
@@ -75,9 +79,13 @@ labels = kmeans.predict(X_contrast)
 kmeans_pca = kmeans.fit(princa)
 labels_pca = kmeans.predict(princa)
 
-#run kmeans on autoencoders train
-kmeans_ae = kmeans.fit(X_train_ae)
-labels_ae = kmeans.predict(X_train_ae)
+#run kmeans on deep autoencoders train
+kmeans_ae_deep = kmeans.fit(X_train_ae_deep)
+labels_ae_deep = kmeans.predict(X_train_ae_deep)
+
+#run kmeans on denoised autoencoders train
+kmeans_ae_denoised = kmeans.fit(X_train_ae_denoised)
+labels_ae_denoised = kmeans.predict(X_train_ae_denoised)
 
 #run k-means on full dataset test
 kmeans_full_test = kmeans.fit(X_contrast_test)
@@ -87,19 +95,25 @@ labels_test = kmeans.predict(X_contrast_test)
 kmeans_pca_test = kmeans.fit(princa_test)
 labels_pca_test = kmeans.predict(princa_test)
 
-#run kemans on autoencoders test
-kmeans_ae_test = kmeans.fit(X_test_ae)
-labels_ae_test = kmeans.predict(X_test_ae)
+#run kemans on deep autoencoders test
+kmeans_ae_test_deep = kmeans.fit(X_test_ae_deep)
+labels_ae_test_deep = kmeans.predict(X_test_ae_deep)
+
+#run kemans on denoised autoencoders test
+kmeans_ae_test_denoised = kmeans.fit(X_test_ae_denoised)
+labels_ae_test_denoised = kmeans.predict(X_test_ae_denoised)
 
 #print number of iterations train data
 print('Number of iterations Full Kmeans train data {}'.format(kmeans_full.n_iter_))
 print('Number of iterations PCA Kmeans train data {}'.format(kmeans_pca.n_iter_))
-print('Number of iterations autoencoder Kmeans train data {}'.format(kmeans_ae.n_iter_))
+print('Number of iterations deep autoencoder Kmeans train data {}'.format(kmeans_ae_deep.n_iter_))
+print('Number of iterations denoised autoencoder Kmeans train data {}'.format(kmeans_ae_denoised.n_iter_))
 
 #print number of iterations test data
 print('Number of iterations Full Kmeans test data{}'.format(kmeans_full_test.n_iter_))
 print('Number of iterations PCA Kmeans test data {}'.format(kmeans_pca_test.n_iter_))
-print('Number of iterations autoencoder Kmeans test data {}'.format(kmeans_ae_test.n_iter_))
+print('Number of iterations deep autoencoder Kmeans test data {}'.format(kmeans_ae_test_deep.n_iter_))
+print('Number of iterations denoised autoencoder Kmeans test data {}'.format(kmeans_ae_test_denoised.n_iter_))
 
 #Print scores full train dataset
 print('Homogeneity Score Full Train Dataset: {}'.format(homogeneity_score(y_train, labels)))
@@ -111,10 +125,15 @@ print('Homogeneity Score PCA Train Dataset: {}'.format(homogeneity_score(y_train
 print('Completeness Score PCA Train Dataset: {}'.format(completeness_score(y_train, labels_pca)))
 print('V-score Score PCA Train Dataset: {}'.format(v_measure_score(y_train, labels_pca)))
 
-#Print Scores autoencoders train data
-print('Homogeneity Score AE Train Dataset: {}'.format(homogeneity_score(y_train, labels_ae)))
-print('Completeness Score AE Train Dataset: {}'.format(completeness_score(y_train, labels_ae)))
-print('V-score Score AE Train Dataset: {}'.format(v_measure_score(y_train, labels_ae)))
+#Print Scores deep autoencoders train data
+print('Homogeneity Score Deep AE Train Dataset: {}'.format(homogeneity_score(y_train, labels_ae_deep)))
+print('Completeness Score Deep AE Train Dataset: {}'.format(completeness_score(y_train, labels_ae_deep)))
+print('V-score Score Deep AE Train Dataset: {}'.format(v_measure_score(y_train, labels_ae_deep)))
+
+#Print Scores deep denoised autoencoders train data
+print('Homogeneity Score Denoised AE Train Dataset: {}'.format(homogeneity_score(y_train, labels_ae_denoised)))
+print('Completeness Score Denoised AE Train Dataset: {}'.format(completeness_score(y_train, labels_ae_denoised)))
+print('V-score Score Denoised AE Train Dataset: {}'.format(v_measure_score(y_train, labels_ae_denoised)))
 
 #Print scores full test dataset
 print('Homogeneity Score Full Test Dataset: {}'.format(homogeneity_score(y_test, labels_test)))
@@ -126,7 +145,12 @@ print('Homogeneity Score Test Dataset PCA: {}'.format(homogeneity_score(y_test, 
 print('Completeness Score Test Dataset PCA: {}'.format(completeness_score(y_test, labels_pca_test)))
 print('V-score Score Test Dataset PCA: {}'.format(v_measure_score(y_test, labels_pca_test)))
 
-#Print Scores autoencoders test data
-print('Homogeneity Score Test Dataset AE: {}'.format(homogeneity_score(y_test, labels_ae_test)))
-print('Completeness Score Test Dataset Ae: {}'.format(completeness_score(y_test, labels_ae_test)))
-print('V-score Score Test Dataset AE: {}'.format(v_measure_score(y_test, labels_ae_test)))
+#Print Scores deep autoencoders test data
+print('Homogeneity Score Test Dataset Deep AE: {}'.format(homogeneity_score(y_test, labels_ae_test_deep)))
+print('Completeness Score Test Dataset Deep AE: {}'.format(completeness_score(y_test, labels_ae_test_deep)))
+print('V-score Score Test Dataset Deep AE: {}'.format(v_measure_score(y_test, labels_ae_test_deep)))
+
+#Print Scores denoised autoencoders test data
+print('Homogeneity Score Test Dataset Denpoised AE: {}'.format(homogeneity_score(y_test, labels_ae_test_denoised)))
+print('Completeness Score Test Dataset Denoised AE: {}'.format(completeness_score(y_test, labels_ae_test_denoised)))
+print('V-score Score Test Dataset Denoised AE: {}'.format(v_measure_score(y_test, labels_ae_test_denoised)))
