@@ -52,3 +52,44 @@ plt.imshow(full_approx[3].reshape(28, 28),
 plt.xlabel('13 components', fontsize = 14)
 plt.title('Reconstructed Image', fontsize = 20)
 plt.show()
+
+#Plot 10 reconstructions
+NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
+plt.figure(figsize=(20, 4))
+for i in range(10):
+    # Display original
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
+    plt.imshow(X_contrast[i].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    if i ==4:
+        ax.set_title('Original')
+    if i == 5:
+        ax.set_title('Images')
+
+
+
+
+    # Display reconstruction
+    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
+    plt.imshow(full_approx[i].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    if i == 4:
+        ax.set_title('Reconstructed')
+    if i == 5:
+        ax.set_title('Images')
+plt.show()
+
+
+#plt.savefig(f"TEST_FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_finale_test_predictions_with_noise"
+ #           f"BS{str(optimal_batch_size)}"
+ #           f"P_NOISE_TYPE{optimal_pretraining_noise_type}"
+ #           f"P_NOISE_PERE{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+ #           # f"F_NOISE_TYPE{optimal_finetuning_noise_type}"    # ONLY FOR DENOISING DEEP AUTOENCODER
+ #           # f"F_NOISE_PER{str(optimal_finetuning_noise_parameter).replace('.', ',')}" # ONLY FOR DENOISING DEEP AUTOENCODER
+ #           f"LAYERS[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+ #           f"LR{str(optimal_learning_rate).replace('.', ',')}"
+ #           f"EPOCHS{str(EPOCHS_FINETUNING)}")
