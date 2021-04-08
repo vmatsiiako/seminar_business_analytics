@@ -67,7 +67,7 @@ pca = PCA(n_components=13)
 princa_test = pca.fit_transform(X_contrast_test)
 
 #initialize K_medoid with 24 clusters
-pam = KMedoids(n_clusters = 24, random_state = 0)
+pam = KMedoids(init="k-medoids++", n_clusters = 24, random_state = 0)
 
 #pam on full contrasted data
 pam_full = pam.fit(X_contrast)
