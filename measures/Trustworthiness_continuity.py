@@ -159,8 +159,8 @@ plt.savefig('pca_test_data.png')
 plt.show()
 
 #plot measures for deep AE on train data
-plt.plot(cont_ae, "-m", label="trustworthiness measure")
-plt.plot(trust_ae, "-c", label="continuity measure")
+plt.plot(cont_ae, "-m", label="continuity measure")
+plt.plot(trust_ae, "-c", label="trustworthiness measure")
 plt.legend(loc="upper right")
 plt.xlabel('Number of Neighbors')
 plt.ylabel('Measure')
