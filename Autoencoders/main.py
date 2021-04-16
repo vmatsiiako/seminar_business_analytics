@@ -2,8 +2,8 @@ import random
 import pickle
 import pandas as pd
 import numpy as np
-# import matplotlib
-# matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import torch
 import cv2
@@ -19,8 +19,8 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-EPOCHS_PRETRAINING = 20
-EPOCHS_FINETUNING = 70
+EPOCHS_PRETRAINING = 3
+EPOCHS_FINETUNING = 2
 NUMBER_FOLDS = 2
 NUMBER_COMBINATIONS = 1
 INTRINSIC_DIMENSIONALITY = 13
@@ -85,7 +85,7 @@ for i in range(NUMBER_COMBINATIONS):
     learning_rate_finetuning = random.sample(LEARNING_RATE_FINETUNING, 1)[0]
 
     # Print the Cross-validation that is being run to keep track of the process
-    print("Starting CV {str(i+1)} of " +
+    print(f"Starting CV {str(i+1)} of " +
           create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter, hidden_layers,
                        learning_rate_pretraining, learning_rate_finetuning,
                        finetuning_noise_type, finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS
@@ -221,8 +221,10 @@ test_loss, training_loss, final_model = final_model.fit(optimal_pretraining_nois
                                                         optimal_pretraining_learning_rate,
                                                         optimal_finetuning_learning_rate)
 
-optimal_epoch = test_loss.argmin(np.array(test_loss)) + 1
+optimal_epoch = np.array(test_loss).argmin() + 1
 print("The optimal number of epochs is: ", optimal_epoch)
+print(test_loss)
+print(training_loss)
 
 # Plot the average validation and training losses for this set of hyperparameters
 N = np.arange(0, EPOCHS_FINETUNING)

@@ -20,15 +20,15 @@ def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter
                  learning_rate_pretraining, learning_rate_finetuning, epoch_pretraining, epoch_finetuning,
                  finetuning_noise_type = None, finetuning_noise_parameter = None, loss = None):
     return f"BATCH_SIZE_{str(batch_size)}" \
-           f"_PRETRAIN_NOISE_TYPE_{pretraining_noise_type}" \
-           f"_PRETRAIN_NOISE_PAR_{str(pretraining_noise_parameter).replace('.', ',')}" \
-           f"_FINETUNE_NOISE_TYPE_{finetuning_noise_type}" \
-           f"_FINETUNE_NOISE_PAR_{str(finetuning_noise_parameter).replace('.', ',')}" \
-           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]" \
-           f"_PRETRAIN_LR_{str(learning_rate_pretraining).replace('.', ',')}" \
-           f"_FINETUNE_LR_{str(learning_rate_finetuning).replace('.', ',')}" \
-           f"_EPOCH_PRETRAINING_{str(epoch_pretraining)}" \
-           f"_EPOCH_FINETUNING_{str(epoch_finetuning)}" \
+           f"_PRETR_NOISE_TYPE_{pretraining_noise_type}" \
+           f"_PRETR_NOISE_PAR_{str(pretraining_noise_parameter).replace('.', ',')}" \
+           f"_FINET_NOISE_TYPE_{finetuning_noise_type}" \
+           f"_FINET_NOISE_PAR_{str(finetuning_noise_parameter).replace('.', ',')}" \
+           f"_HID_LAYERS_[{','.join([str(elem) for elem in hidden_layers])}]" \
+           f"_PRETR_LR_{str(learning_rate_pretraining).replace('.', ',')}" \
+           f"_FINET_LR_{str(learning_rate_finetuning).replace('.', ',')}" \
+           f"_EPOCH_PRETR_{str(epoch_pretraining)}" \
+           f"_EPOCH_FINET_{str(epoch_finetuning)}" \
            f"_LOSS_{str(loss).replace('.', ',')}"
 
 print(create_title(64, 'zeros', 0.5, [1, 2, 3, 4], 0.5, 0.5, 20, 50))
