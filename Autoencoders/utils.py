@@ -1,5 +1,7 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 
 def add_noise(img, noise_type, parameter=None):
@@ -31,32 +33,33 @@ def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter
            f"_EPOCH_FINET_{str(epoch_finetuning)}" \
            f"_LOSS_{str(loss).replace('.', ',')}"
 
-print(create_title(64, 'zeros', 0.5, [1, 2, 3, 4], 0.5, 0.5, 20, 50))
+def reconstruct(train_dl, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
+                optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
+                optimal_finetuning_learning_rate, epochs_pretraining, optimal_epoch, start_name,
+                optimal_finetuning_noise_type, optimal_finetuning_noise_parameter,  # ONLY FOR DENOSING AUTOENCODERS
+                PICTURE_DIMENSION=28, NUMBER_OF_PICTURES_TO_DISPLAY=10):
+    plt.figure(figsize=(20, 4))
+    for i, features in enumerate(train_dl):
+        # Display original
+        ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
+        plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
 
-# def display_2d_repr(data, labels, fname=None):
-#     """Display a 2d representation of the MNIST digits
-#     Parameters
-#     ----------
-#     data: Tensor
-#         2d representation of MNIST digits
-#     labels: list
-#         the label for each data point in data
-#     fname: str
-#         filename to save plot in
-#     """
-#
-#     digit_to_color = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple",
-#                       "tab:brown", "tab:pink", "tab:gray", "tab:olive", "tab:cyan"]
-#     xs = np.array([x[0] for x in data])
-#     ys = np.array([x[1] for x in data])
-#
-#     fig, ax = plt.subplots()
-#     labels_to_show = labels[0:len(data)]
-#     for digit in range(10):
-#         ix = np.where(labels_to_show == digit)
-#         ax.scatter(xs[ix], ys[ix], c=digit_to_color[digit],
-#                     label=digit, marker=".")
-#     ax.legend()
-#     if fname is not None:
-#         plt.savefig(fname)
-#     plt.show()
+        # Display reconstruction
+        ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
+        plt.imshow(
+            final_model_early_stopping(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+        if i == 9:
+            break
+
+    plt.savefig(start_name +
+                create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
+                             optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
+                             epochs_pretraining, optimal_epoch,
+                             optimal_finetuning_noise_type,
+                             optimal_finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
