@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from Autoencoders.Deep_Autoencoder_model import DenoisingDeepAutoencoder
 from Autoencoders.Deep_Autoencoder_model import DeepAutoencoder
 from sklearn.model_selection import KFold
-from Autoencoders.utils import create_title
+from Autoencoders.utils import create_title, reconstruct
 
 
 # CONSTANTS
@@ -19,10 +19,10 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-EPOCHS_PRETRAINING = 3
-EPOCHS_FINETUNING = 2
-NUMBER_FOLDS = 2
-NUMBER_COMBINATIONS = 1
+EPOCHS_PRETRAINING = 20
+EPOCHS_FINETUNING = 50
+NUMBER_FOLDS = 5
+NUMBER_COMBINATIONS = 10
 INTRINSIC_DIMENSIONALITY = 13
 
 # Hyper-parameters to be tuned using cross-validation
@@ -264,7 +264,7 @@ pickle.dump(final_model_early_stopping,
                               optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                               EPOCHS_PRETRAINING, optimal_epoch,
                               optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-                 f"_EPOCH_{str(optimal_epoch)}.sav", 'wb'))
+                 ".sav", 'wb'))
 
 # If we need to retrive the model we can use this
 # autoencoder = pickle.load(open('final_autoencoder.sav', 'rb'))
@@ -281,7 +281,7 @@ np.savetxt("reduced_trainset_" +
                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                         EPOCHS_PRETRAINING, optimal_epoch,
                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-           "_EPOCH_{str(optimal_epoch)}.csv", reduced_train, delimiter=',')
+           ".csv", reduced_train, delimiter=',')
 
 # Save the lower dimensional test dataset as predicted by the optimal autoencoder
 X_test_contrast = torch.Tensor(X_test_contrast)
@@ -295,64 +295,22 @@ np.savetxt("reduced_testset_" +
                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                         EPOCHS_PRETRAINING, optimal_epoch,
                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-           "_EPOCH_{str(optimal_epoch)}.csv", reduced_test, delimiter=',')
+           ".csv", reduced_test, delimiter=',')
 
-NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
-plt.figure(figsize=(20, 4))
-for i, features in enumerate(visualize_test):
-    # Display original
-    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
-    plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
+reconstruct(visualize_test, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
+            optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
+            optimal_finetuning_learning_rate, EPOCHS_PRETRAINING, optimal_epoch, "Test_predictions_",
+            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) # ONLY FOR DENOSING AUTOENCODERS
 
-    # Display reconstruction
-    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
-    plt.imshow(final_model_early_stopping(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    if i == 9:
-        break
-
-plt.savefig("Test_predictions_" +
-            create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
-                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
-                         EPOCHS_PRETRAINING, optimal_epoch,
-                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-            "_EPOCHS_{str(optimal_epoch)}")
-
-NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
-plt.figure(figsize=(20, 4))
-for i, features in enumerate(train_dl):
-    # Display original
-    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
-    plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-
-    # Display reconstruction
-    ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
-    plt.imshow(final_model_early_stopping(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    if i == 9:
-        break
-
-plt.savefig("Train_predictions_" +
-            create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
-                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
-                         EPOCHS_PRETRAINING, optimal_epoch,
-                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-            "_EPOCHS_{str(optimal_epoch)}")
+reconstruct(train_dl, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
+            optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
+            optimal_finetuning_learning_rate, EPOCHS_PRETRAINING, optimal_epoch, "Train_predictions_",
+            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) # ONLY FOR DENOSING AUTOENCODERS
 
 # Analyse the features that are captured by the first layer of the model
 plt.figure(figsize=(30, 30))
 for i in range(150):
-    weights = final_model_early_stopping.encoders[0].detach().numpy()[:, i+3].reshape(28, 28)
+    weights = final_model_early_stopping.encoders[0].detach().numpy()[:, i+3].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION)
     ax = plt.subplot(15, 10, i + 1)
     plt.imshow(weights)
     plt.gray()
@@ -363,5 +321,4 @@ plt.savefig(f"features_captured_with_noise" +
             create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                          optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                          EPOCHS_PRETRAINING, optimal_epoch,
-                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
-            "_EPOCHS_{str(optimal_epoch)}")
+                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS

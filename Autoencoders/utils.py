@@ -18,6 +18,7 @@ def add_noise(img, noise_type, parameter=None):
         img = img * noise
         return img
 
+
 def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter, hidden_layers,
                  learning_rate_pretraining, learning_rate_finetuning, epoch_pretraining, epoch_finetuning,
                  finetuning_noise_type = None, finetuning_noise_parameter = None, loss = None):
@@ -32,6 +33,7 @@ def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter
            f"_EPOCH_PRETR_{str(epoch_pretraining)}" \
            f"_EPOCH_FINET_{str(epoch_finetuning)}" \
            f"_LOSS_{str(loss).replace('.', ',')}"
+
 
 def reconstruct(train_dl, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
                 optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
