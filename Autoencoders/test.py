@@ -5,13 +5,10 @@ import numpy as np
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import torch.nn as nn
 import torch
 import cv2
 from torch.utils.data import DataLoader, TensorDataset
-from Autoencoders.utils import add_noise
-from Autoencoders.model import Model
-from sklearn.model_selection import KFold
+from Autoencoders.Deep_Autoencoder_model import DenoisingDeepAutoencoder
 import pickle
 
 
@@ -20,19 +17,22 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
-EPOCHS_PRETRAINING = 20
-EPOCHS_FINETUNING = 50
+EPOCHS_PRETRAINING = 10
+EPOCHS_FINETUNING = 10
 NUMBER_FOLDS = 5
 optimal_batch_size = 64
-optimal_noise_type = 'zeros'
-optimal_noise = 0.3
-optimal_hidden_layers = [800,400,200,13]
-optimal_learning_rate = 0.001  #try 0.002
-optimal_epoch = 80
+optimal_pretraining_noise_type = 'gaussian'
+optimal_pretraining_noise_parameter = 0.1
+optimal_finetuning_noise_type = 'gaussian' # ONLY FOR DENOISING DEEP AUTOENCODER
+optimal_finetuning_noise_parameter = 0.3   # ONLY FOR DENOISING DEEP AUTOENCODER
+optimal_hidden_layers = [620, 330, 13]
+optimal_pretraining_learning_rate = 0.01
+optimal_finetuning_learning_rate = 0.001
+
 
 # import and extract the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-df_test = pd.read_csv("../Data/sign_mnist_test.csv")
+df_test = pd.read_csv("../Data/sign_mnist_test.csv")[1500:]
 X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 X_test = df_test.iloc[:,1:].values
@@ -40,84 +40,120 @@ y_test = df_test.iloc[:,0].values
 del df  #delete dataframe to reduce usage of memory
 del df_test #delete dataframe to reduce usage of memory
 
+# Construct the contrasted training pictures dataset
 X_train_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_train_contrast)):
     image = X_train[i, :]
     image = image.astype(np.uint8)
     X_train_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
+# Construct the contrasted test pictures dataset
 X_test_contrast = np.zeros(np.shape(X_test))
 for i in range(len(X_test_contrast)):
     image = X_test[i, :]
     image = image.astype(np.uint8)
     X_test_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
-# normalize data
+# Normalize data
 X_train_contrast = X_train_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 
+model = DenoisingDeepAutoencoder()
+test_loss, train_loss, model = model.fit(optimal_pretraining_noise_type,
+                                               optimal_pretraining_noise_parameter,
+                                               optimal_finetuning_noise_type,   # ONLY FOR DENOISING DEEP AUTOENCODER
+                                               optimal_finetuning_noise_parameter,  # ONLY FOR DENOISING DEEP AUTOENCODER
+                                               optimal_batch_size,
+                                               optimal_hidden_layers,
+                                               X_train_contrast,
+                                               X_test_contrast,
+                                               EPOCHS_FINETUNING,
+                                               EPOCHS_PRETRAINING,
+                                               optimal_pretraining_learning_rate,
+                                               optimal_finetuning_learning_rate)
 
-X_train_contrast_noise = np.zeros(np.shape(X_train_contrast))
-for i in range(len(X_train_contrast)):
-    X_train_contrast_noise[i] = add_noise(X_train_contrast[i, :], noise_type=optimal_noise_type, parameter=optimal_noise)
-X_train_contrast_noise = torch.Tensor(X_train_contrast_noise)
-X_train_contrast = torch.Tensor(X_train_contrast)
-train_ds_clean = TensorDataset(X_train_contrast)
-train_ds_noise = TensorDataset(X_train_contrast_noise)
-train_dl_clean = DataLoader(train_ds_clean, batch_size=optimal_batch_size, shuffle=False)
-train_dl_noise = DataLoader(train_ds_noise, batch_size=optimal_batch_size, shuffle=False)
+last_loss = test_loss[-1]
+min_loss = test_loss.min()
+epoch = test_loss.argmin() + 1
 
+print("last loss:" )
+print(last_loss)
+print("optimal epoch: ")
+print(epoch)
+print("optimal loss: ")
+print(min_loss)
+
+# Plot the average validation and training losses for this set of hyperparameters
+N = np.arange(0, EPOCHS_FINETUNING)
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(N, test_loss, label="test_loss")
+plt.plot(N, train_loss, label="final_train_loss")
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Mean Squared Error")
+plt.legend(loc="lower left")
+plt.savefig(f"_EPOCHS_VALIDATION_"
+            f"_BATCH_SIZE_{str(optimal_batch_size)}"
+            f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+            f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+            f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}"   # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}" # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+            f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+            f"F_LR{str(optimal_finetuning_learning_rate).replace('.', ',')}")
+
+# Save the optimal trained model using pickle
+pickle.dump(model,open(f"_Autoencoder_"
+                       f"_BATCH_SIZE_{str(optimal_batch_size)}"
+                       f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+                       f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+                       f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}"   # ONLY FOR DENOISING DEEP AUTOENCODER
+                       f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}" # ONLY FOR DENOISING DEEP AUTOENCODER
+                       f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+                       f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+                       f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+                       f"_EPOCH_{str(EPOCHS_FINETUNING)}.sav", 'wb'))
+
+# # autoencoder = pickle.load(open('Autoencoder_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_27.sav', 'rb'))
+
+# Save the lower dimensional training dataset as predicted by the optimal autoencoder
+X_train_torch = torch.Tensor(X_train_contrast)
+train_ds = TensorDataset(X_train_torch)
+train_dl = DataLoader(train_ds, batch_size=1, shuffle=False)
+reduced_train = np.zeros((len(train_dl),13))
+for i, features in enumerate(train_dl):
+    reduced_train[i] = model.encode(features[0]).detach().numpy()
+np.savetxt(f"reduced_trainset_"
+           f"_BATCH_SIZE_{str(optimal_batch_size)}"
+           f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+           f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+           f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}" # ONLY FOR DENOISING DEEP AUTOENCODER
+           f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}"   # ONLY FOR DENOISING DEEP AUTOENCODER
+           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+           f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+           f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+           f"_EPOCH_{str(EPOCHS_FINETUNING)}.csv", reduced_train, delimiter=',')
+
+# Save the lower dimensional test dataset as predicted by the optimal autoencoder
 X_test_contrast = torch.Tensor(X_test_contrast)
 test_ds = TensorDataset(X_test_contrast)
 visualize_test = DataLoader(test_ds, batch_size=1, shuffle=False)
-final_model = Model()
-test_loss, training_loss, autoencoder = final_model.fit(optimal_noise,
-                                                   optimal_batch_size,
-                                                   optimal_hidden_layers,
-                                                   train_dl_clean,
-                                                   train_dl_noise,
-                                                   visualize_test,
-                                                   optimal_noise_type,
-                                                   optimal_epoch,
-                                                   EPOCHS_PRETRAINING,
-                                                   optimal_learning_rate)
-
-print(test_loss)
-
-pickle.dump(autoencoder,open(f"Noise_Autoencoder_with"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}.sav", 'wb'))
-
-# autoencoder = pickle.load(open('final_autoencoder.sav', 'rb'))
-
-visualize_train = DataLoader(train_ds_clean, batch_size=1, shuffle=False)
-reduced_train = np.zeros((len(visualize_train),13))
-for i, features in enumerate(visualize_train):
-    reduced_train[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt(f"reduced_trainset_with"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}.csv", reduced_train, delimiter=',')
-
 reduced_test = np.zeros((len(visualize_test),13))
 for i, features in enumerate(visualize_test):
-    reduced_test[i] = autoencoder.encode(features[0]).detach().numpy()
-np.savetxt(f"reduced_test_set_with"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}.csv", reduced_test, delimiter=',')
+    reduced_test[i] = model.encode(features[0]).detach().numpy()
+np.savetxt(f"reduced_testset_"
+           f"_BATCH_SIZE_{str(optimal_batch_size)}"
+           f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+           f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+           f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}" # ONLY FOR DENOISING DEEP AUTOENCODER
+           f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}"   # ONLY FOR DENOISING DEEP AUTOENCODER
+           f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+           f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+           f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+           f"_EPOCH_{str(EPOCHS_FINETUNING)}.csv", reduced_test, delimiter=',')
 
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
@@ -131,24 +167,27 @@ for i, features in enumerate(visualize_test):
 
     # Display reconstruction
     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
-    plt.imshow(autoencoder(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.imshow(model(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     if i == 9:
         break
 
-plt.savefig(f"finale_test_predictions_with_noise"
+plt.savefig(f"_test_predictions_"
             f"_BATCH_SIZE_{str(optimal_batch_size)}"
-            f"_NOISE_TYPE_{optimal_noise_type}"
-            f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+            f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+            f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+            f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}" # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}"   # ONLY FOR DENOISING DEEP AUTOENCODER
             f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-            f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-            f"_EPOCHS_{str(optimal_epoch)}")
+            f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+            f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+            f"_EPOCHS_{str(EPOCHS_FINETUNING)}")
 
 NUMBER_OF_PICTURES_TO_DISPLAY = 10  # How many pictures we will display
 plt.figure(figsize=(20, 4))
-for i, features in enumerate(visualize_train):
+for i, features in enumerate(train_dl):
     # Display original
     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1)
     plt.imshow(features[0].numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
@@ -158,42 +197,42 @@ for i, features in enumerate(visualize_train):
 
     # Display reconstruction
     ax = plt.subplot(2, NUMBER_OF_PICTURES_TO_DISPLAY, i + 1 + NUMBER_OF_PICTURES_TO_DISPLAY)
-    plt.imshow(autoencoder(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
+    plt.imshow(model(features[0]).detach().numpy().reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     if i == 9:
         break
 
-plt.savefig(f"finale_train_predictions_with_noise"
+plt.savefig(f"_train_predictions_"
             f"_BATCH_SIZE_{str(optimal_batch_size)}"
-            f"_NOISE_TYPE_{optimal_noise_type}"
-            f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
+            f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+            f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+            f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}" # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}"   # ONLY FOR DENOISING DEEP AUTOENCODER
             f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-            f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-            f"_EPOCHS_{str(optimal_epoch)}")
+            f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+            f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+            f"_EPOCHS_{str(EPOCHS_FINETUNING)}")
 
 # Analyse the features that are captured by the first layer of the model
-plt.figure(figsize=(30, 30))
-for i in range(150):
-    weights = autoencoder.encoders[0].detach().numpy()[:,i+3].reshape(28,28)
-    ax = plt.subplot(15, 10, i + 1)
+plt.figure(figsize=(50, 50))
+for i in range(225):
+    weights = model.encoders[0].detach().numpy()[:,i+1].reshape(28,28)
+    ax = plt.subplot(15, 15, i + 1)
     plt.imshow(weights)
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
 plt.savefig(f"features_captured_with_noise"
-      f"_BATCH_SIZE_{str(optimal_batch_size)}"
-      f"_NOISE_TYPE_{optimal_noise_type}"
-      f"_NOISE_PERCENTAGE_{str(optimal_noise).replace('.', ',')}"
-      f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
-      f"_LEATNING_RATE_{str(optimal_learning_rate).replace('.', ',')}"
-      f"_EPOCH_{str(optimal_epoch)}")
+            f"_BATCH_SIZE_{str(optimal_batch_size)}"
+            f"_P_NOISE_TYPE_{optimal_pretraining_noise_type}"
+            f"_P_NOISE_PAR_{str(optimal_pretraining_noise_parameter).replace('.', ',')}"
+            f"_F_NOISE_TYPE_{optimal_finetuning_noise_type}" # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_F_NOISE_PAR_{str(optimal_finetuning_noise_parameter).replace('.', ',')}"   # ONLY FOR DENOISING DEEP AUTOENCODER
+            f"_HIDDEN_LAYERS_[{','.join([str(elem) for elem in optimal_hidden_layers])}]"
+            f"_P_LR_{str(optimal_pretraining_learning_rate).replace('.', ',')}"
+            f"_F_LR_{str(optimal_finetuning_learning_rate).replace('.', ',')}"
+            f"_EPOCH_{str(EPOCHS_FINETUNING)}")
 
-loss = nn.MSELoss()
-final_training_loss = 0
-for k, features in enumerate(visualize_test):
-    batch_loss = loss(features[0], autoencoder(features[0]))
-    final_training_loss += batch_loss
-print(final_training_loss/len(visualize_test))
