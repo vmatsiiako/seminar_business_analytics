@@ -25,5 +25,26 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
   In this file, we store the functions that are used in the evaluation steps of `main.py`.
 ### 2. Clustering
+- `kmeans.py`
 
+  In this file, we analyze the clustering performance of k-means on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Here, we use the Homegeneity, Completeness, and V-measure scores.
+- `kmeansreduced.py`
+
+  This is the file in which perform the clustering analysis of the reduced data set (omitting the pictures with fist-like signs).
+- `kmedoids.py`
+
+  In this file, we analyze the clustering performance of k-medoids on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Again, we use the Homegeneity, Completeness, and V-measure scores.
+  
 ### 3. Data
+
+- `sign_mnist_train.csv` is the data set containing all the train data in the original format. 
+- `sign_mnist_test.csv` is the data set containing all the test data in the original format.
+- `Final_train_denoising_ae.csv` is the data set containing the reduced train data obtained from the Denoising Deep Autoencoder model.
+- `Final_test_denoising_ae.csv` is the data set containing the reduced test data obtained from the Denoising Deep Autoencoder model.
+- `Final_train_ae.csv` is the data set containing the reduced train data obtained from the Deep Autoencoder model.
+- `Final_test_ae.csv` is the data set containing the reduced test data obtained from the Deep Autoencoder model.
+
+### 4. Intrinsic Dimensionality 
+
+- `ID_estimation.py` 
+  In this file, we estimate the intrinsic dimensionality based on our train data. We use
