@@ -12,6 +12,7 @@ MAX_BRIGHTNESS = 255
 MEAN = 0.5
 NUMBER_OF_PIXELS = 784
 PICTURE_DIMENSION = 28
+INTRINSIC_DIMENSIONALITY = 13
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -29,7 +30,7 @@ for i in range(len(X_contrast)):
 X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_train = X_train.astype('float32') / MAX_BRIGHTNESS - MEAN
 
-pca = PCA(n_components=13)
+pca = PCA(n_components=INTRINSIC_DIMENSIONALITY)
 principalComponents = pca.fit_transform(X_contrast)
 print(pca.explained_variance_ratio_)
 
