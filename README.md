@@ -33,7 +33,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   This is the file in which perform the clustering analysis of the reduced data set (omitting the pictures with fist-like signs).
 - `kmedoids.py`
 
-  In this file, we analyze the clustering performance of k-medoids on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Again, we use the Homegeneity, Completeness, and V-measure scores.
+  Here, we analyze the clustering performance of k-medoids on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Again, we use the Homegeneity, Completeness, and V-measure scores.
   
 ### 3. Data
 
@@ -43,8 +43,26 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 - `Final_test_denoising_ae.csv` is the data set containing the reduced test data obtained from the Denoising Deep Autoencoder model.
 - `Final_train_ae.csv` is the data set containing the reduced train data obtained from the Deep Autoencoder model.
 - `Final_test_ae.csv` is the data set containing the reduced test data obtained from the Deep Autoencoder model.
+- `exploratory_data_analysis.py`
+- `preprocessing.py`
+
+  In this file, we preprocess the data sets which will be used after and save them as `.csv` files. 
 
 ### 4. Intrinsic Dimensionality 
 
 - `ID_estimation.py` 
-  In this file, we estimate the intrinsic dimensionality based on our train data. We use
+
+  In this file, we estimate the intrinsic dimensionality based on our train data. The two methods used are Correlation Dimension and an algorithm based on eigenvalues.
+  
+### 5. Measures
+
+- `Trustworthiness_continuity.py`
+
+  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets.
+  
+### 6. PCA
+
+- `pca.py`
+
+  
+- `pca_reconstruction.py`
