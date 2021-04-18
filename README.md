@@ -75,3 +75,4 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   
 - [ ] Connect the utils in AE and pcs_reconstruction.py
 - [x] Create a global constants.py
+- [ ] requirements.txt?
