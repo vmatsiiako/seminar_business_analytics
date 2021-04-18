@@ -78,21 +78,3 @@ plt.show()
 
 #Print the explained variance
 print('Explained variance{}'.format(pca.explained_variance_ratio_))
-
-
-# THIS PART OF THE CODE IS USED FOR VISUALIZING FEATURES' DISTRIBUTION
-# sns.displot(pd.DataFrame(x[:,153]), x=0, binwidth=3)  # If you wanna visualize a distribution of a certain pixel
-#sns.displot(X_train, x=0, binwidth=3)   # If you wanna visualize the distribution of a certain picture
-#plt.xlim(0, MAX_BRIGHTNESS)
-#plt.show()
-
-# This is the code for visualizing the average picture
-#plt.figure(figsize=(4, 4))
-# Display original
-#ax = plt.subplot(1, 1, 1)
-#plt.imshow(X_train[0].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION))
-#plt.gray()
-#ax.get_xaxis().set_visible(False)
-#ax.get_yaxis().set_visible(False)
-# plt.show()
-# plt.savefig('average_picture_contrast.pdf')
