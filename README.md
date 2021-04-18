@@ -64,5 +64,14 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
 - `pca.py`
 
-  
+  In this file, we reduce the dimensionality of data to our intrinsic dimensionality using the PCA method. Additionally, we provide the possibility of visualiztion for 2- and 3-Dimensional data. 
 - `pca_reconstruction.py`
+
+  This is the file in which we reconstruct the pictures based on the data reduced by the PCA alrgorithm. 
+  
+## 7. TSNE
+  
+  - `tsne.py` is the file in which we apply the t_SNE method to out data.
+  
+#TODO: Connect the utils in AE and pcs_reconstruction.py
+#TODO: Create a global constants.py
