@@ -69,7 +69,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
   This is the file in which we reconstruct the pictures based on the data reduced by the PCA alrgorithm. 
   
-## 7. TSNE
+### 7. TSNE
   
   - `tsne.py` is the file in which we apply the t_SNE method to out data.
   
