@@ -6,13 +6,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 import cv2
 import seaborn as sns
-
-#Initialize constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
-INTRINSIC_DIMENSIONALITY = 13
+from constants import MAX_BRIGHTNESS, INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, NUMBER_OF_PIXELS, MEAN
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")

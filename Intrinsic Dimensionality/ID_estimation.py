@@ -3,11 +3,8 @@ import cv2
 import numpy as np
 from skdim.id import CorrInt
 from skdim.id import lPCA
+from constants import MAX_BRIGHTNESS, NUMBER_OF_PIXELS, MEAN
 
-#Initialize constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")

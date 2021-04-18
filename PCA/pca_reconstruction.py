@@ -5,12 +5,7 @@ from sklearn.decomposition import PCA
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-
-#define set of constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
+from constants import MAX_BRIGHTNESS, PICTURE_DIMENSION, NUMBER_OF_PIXELS, MEAN
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")

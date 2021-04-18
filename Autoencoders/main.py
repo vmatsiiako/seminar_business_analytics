@@ -1,29 +1,26 @@
 import random
 import pickle
-import pandas as pd
-import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 import torch
 import cv2
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 from torch.utils.data import DataLoader, TensorDataset
 from Autoencoders.Deep_Autoencoder_model import DenoisingDeepAutoencoder
 from Autoencoders.Deep_Autoencoder_model import DeepAutoencoder
 from sklearn.model_selection import KFold
 from Autoencoders.utils import create_title, reconstruct
-
+from constants import MAX_BRIGHTNESS, INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, NUMBER_OF_PIXELS, MEAN
+matplotlib.use('TkAgg')
 
 # CONSTANTS
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
-PICTURE_DIMENSION = 28
 EPOCHS_PRETRAINING = 20
 EPOCHS_FINETUNING = 50
 NUMBER_FOLDS = 5
 NUMBER_COMBINATIONS = 10
-INTRINSIC_DIMENSIONALITY = 13
 
 # Hyper-parameters to be tuned using cross-validation
 BATCH_SIZE = [8, 16, 32, 64, 128]
@@ -85,10 +82,10 @@ for i in range(NUMBER_COMBINATIONS):
     learning_rate_finetuning = random.sample(LEARNING_RATE_FINETUNING, 1)[0]
 
     # Print the Cross-validation that is being run to keep track of the process
-    print(f"Starting CV {str(i+1)} of " +
+    print(f"Starting CV {str(i + 1)} of " +
           create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter, hidden_layers,
                        learning_rate_pretraining, learning_rate_finetuning,
-                       finetuning_noise_type, finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS
+                       finetuning_noise_type, finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
 
     # Initialize the matrices that will save the training and validation losses for the different folds
     current_validation_losses = np.zeros((EPOCHS_FINETUNING, NUMBER_FOLDS))
@@ -97,7 +94,7 @@ for i in range(NUMBER_COMBINATIONS):
 
     # Loop over all the folds
     for train_index, test_index in kf.split(X_train_contrast):
-        print(f"Starting_Fold_{str(column+1)}")
+        print(f"Starting_Fold_{str(column + 1)}")
 
         # Create the training and validation sets for this fold
         X_train_CV, X_validation_CV = X_train_contrast[train_index], X_train_contrast[test_index]
@@ -106,8 +103,8 @@ for i in range(NUMBER_COMBINATIONS):
         model = DenoisingDeepAutoencoder()
         val_loss, final_train, model = model.fit(pretraining_noise_type,
                                                  pretraining_noise_parameter,
-                                                 finetuning_noise_type,    # ONLY FOR DENOISING DEEP AUTOENCODER
-                                                 finetuning_noise_parameter,   # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                 finetuning_noise_type,  # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                 finetuning_noise_parameter,  # ONLY FOR DENOISING DEEP AUTOENCODER
                                                  batch_size,
                                                  hidden_layers,
                                                  X_train_CV,
@@ -130,7 +127,7 @@ for i in range(NUMBER_COMBINATIONS):
 
     # Find the minimum val loss to choose the optimal model
     minimum_loss = average_validation_loss.min()
-    epoch = average_validation_loss.argmin()+1
+    epoch = average_validation_loss.argmin() + 1
 
     # Plot the average validation and training losses for this set of hyperparameters
     N = np.arange(0, EPOCHS_FINETUNING)
@@ -145,7 +142,8 @@ for i in range(NUMBER_COMBINATIONS):
     plt.savefig(f"loss_graph_" + create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter,
                                               hidden_layers, learning_rate_pretraining, learning_rate_finetuning,
                                               EPOCHS_PRETRAINING, EPOCHS_FINETUNING,
-                                              finetuning_noise_type, finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS
+                                              finetuning_noise_type,
+                                              finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
 
     # Save the optimal hyperparameter set
     if i == 0 or minimum_loss < optimal_loss:
@@ -164,7 +162,8 @@ print("Optimal model is" +
       create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                    optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                    EPOCHS_PRETRAINING, optimal_epoch,
-                   optimal_finetuning_noise_type, optimal_finetuning_noise_parameter, optimal_loss)) # ONLY FOR DENOSING AUTOENCODERS
+                   optimal_finetuning_noise_type, optimal_finetuning_noise_parameter,
+                   optimal_loss))  # ONLY FOR DENOSING AUTOENCODERS
 
 print("Starting the validation of the number of epochs")
 
@@ -210,8 +209,10 @@ X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 final_model = DenoisingDeepAutoencoder()
 test_loss, training_loss, final_model = final_model.fit(optimal_pretraining_noise_type,
                                                         optimal_pretraining_noise_parameter,
-                                                        optimal_finetuning_noise_type,  # ONLY FOR DENOISING DEEP AUTOENCODER
-                                                        optimal_finetuning_noise_parameter,  # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                        optimal_finetuning_noise_type,
+                                                        # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                        optimal_finetuning_noise_parameter,
+                                                        # ONLY FOR DENOISING DEEP AUTOENCODER
                                                         optimal_batch_size,
                                                         optimal_hidden_layers,
                                                         X_train_contrast,
@@ -240,14 +241,17 @@ plt.savefig("_EPOCHS_VALIDATION_" +
             create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                          optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                          EPOCHS_PRETRAINING, optimal_epoch,
-                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS
+                         optimal_finetuning_noise_type,
+                         optimal_finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
 
 # Initialize the model and train it with the full training set and with the optimal hyperparameters
 final_model_early_stopping = DenoisingDeepAutoencoder()
 test_loss, training_loss, final_model_early_stopping = final_model_early_stopping.fit(optimal_pretraining_noise_type,
                                                                                       optimal_pretraining_noise_parameter,
-                                                                                      optimal_finetuning_noise_type,  # ONLY FOR DENOISING DEEP AUTOENCODER
-                                                                                      optimal_finetuning_noise_parameter,  # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                                                      optimal_finetuning_noise_type,
+                                                                                      # ONLY FOR DENOISING DEEP AUTOENCODER
+                                                                                      optimal_finetuning_noise_parameter,
+                                                                                      # ONLY FOR DENOISING DEEP AUTOENCODER
                                                                                       optimal_batch_size,
                                                                                       optimal_hidden_layers,
                                                                                       X_train_contrast,
@@ -259,11 +263,13 @@ test_loss, training_loss, final_model_early_stopping = final_model_early_stoppin
 
 # Save the optimal trained model using pickle
 pickle.dump(final_model_early_stopping,
-            open("_Autoencoder_"  +
+            open("_Autoencoder_" +
                  create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
-                              optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
+                              optimal_hidden_layers, optimal_pretraining_learning_rate,
+                              optimal_finetuning_learning_rate,
                               EPOCHS_PRETRAINING, optimal_epoch,
-                              optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
+                              optimal_finetuning_noise_type,
+                              optimal_finetuning_noise_parameter) +  # ONLY FOR DENOSING AUTOENCODERS
                  ".sav", 'wb'))
 
 # If we need to retrive the model we can use this
@@ -280,7 +286,8 @@ np.savetxt("reduced_trainset_" +
            create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                         EPOCHS_PRETRAINING, optimal_epoch,
-                        optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
+                        optimal_finetuning_noise_type,
+                        optimal_finetuning_noise_parameter) +  # ONLY FOR DENOSING AUTOENCODERS
            ".csv", reduced_train, delimiter=',')
 
 # Save the lower dimensional test dataset as predicted by the optimal autoencoder
@@ -294,23 +301,25 @@ np.savetxt("reduced_testset_" +
            create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                         optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                         EPOCHS_PRETRAINING, optimal_epoch,
-                        optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) + # ONLY FOR DENOSING AUTOENCODERS
+                        optimal_finetuning_noise_type,
+                        optimal_finetuning_noise_parameter) +  # ONLY FOR DENOSING AUTOENCODERS
            ".csv", reduced_test, delimiter=',')
 
 reconstruct(visualize_test, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
             optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
             optimal_finetuning_learning_rate, EPOCHS_PRETRAINING, optimal_epoch, "Test_predictions_",
-            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) # ONLY FOR DENOSING AUTOENCODERS
+            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter)  # ONLY FOR DENOSING AUTOENCODERS
 
 reconstruct(train_dl, final_model_early_stopping, optimal_batch_size, optimal_pretraining_noise_type,
             optimal_pretraining_noise_parameter, optimal_hidden_layers, optimal_pretraining_learning_rate,
             optimal_finetuning_learning_rate, EPOCHS_PRETRAINING, optimal_epoch, "Train_predictions_",
-            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter) # ONLY FOR DENOSING AUTOENCODERS
+            optimal_finetuning_noise_type, optimal_finetuning_noise_parameter)  # ONLY FOR DENOSING AUTOENCODERS
 
 # Analyse the features that are captured by the first layer of the model
 plt.figure(figsize=(30, 30))
 for i in range(150):
-    weights = final_model_early_stopping.encoders[0].detach().numpy()[:, i+3].reshape(PICTURE_DIMENSION, PICTURE_DIMENSION)
+    weights = final_model_early_stopping.encoders[0].detach().numpy()[:, i + 3].reshape(PICTURE_DIMENSION,
+                                                                                        PICTURE_DIMENSION)
     ax = plt.subplot(15, 10, i + 1)
     plt.imshow(weights)
     plt.gray()
@@ -321,4 +330,5 @@ plt.savefig(f"features_captured_with_noise" +
             create_title(optimal_batch_size, optimal_pretraining_noise_type, optimal_pretraining_noise_parameter,
                          optimal_hidden_layers, optimal_pretraining_learning_rate, optimal_finetuning_learning_rate,
                          EPOCHS_PRETRAINING, optimal_epoch,
-                         optimal_finetuning_noise_type, optimal_finetuning_noise_parameter)) # ONLY FOR DENOSING AUTOENCODERS
+                         optimal_finetuning_noise_type,
+                         optimal_finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
