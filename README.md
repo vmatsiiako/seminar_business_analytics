@@ -73,6 +73,5 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   
   - `tsne.py` is the file in which we apply the t_SNE method to out data.
   
-#TODO: Connect the utils in AE and pcs_reconstruction.py
-
-#TODO: Create a global constants.py
+- [ ] Connect the utils in AE and pcs_reconstruction.py
+- [ ] Create a global constants.py
