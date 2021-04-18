@@ -6,11 +6,8 @@ matplotlib.use('TkAgg')
 from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.cluster import KMeans
+from constants import MAX_BRIGHTNESS, NUMBER_OF_PIXELS, MEAN
 
-#Initialize constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")

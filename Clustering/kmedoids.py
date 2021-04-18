@@ -4,11 +4,8 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
 from sklearn_extra.cluster import KMedoids
+from constants import MAX_BRIGHTNESS, NUMBER_OF_PIXELS, MEAN
 
-#Initialize constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")

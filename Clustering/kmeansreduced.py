@@ -5,11 +5,7 @@ import cv2
 matplotlib.use('TkAgg')
 import numpy as np
 from sklearn.cluster import KMeans
-
-#Initialize constants
-MAX_BRIGHTNESS = 255
-MEAN = 0.5
-NUMBER_OF_PIXELS = 784
+from constants import MAX_BRIGHTNESS, NUMBER_OF_PIXELS, MEAN
 
 #load in train data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
