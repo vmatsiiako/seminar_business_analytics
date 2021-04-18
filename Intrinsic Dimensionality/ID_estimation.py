@@ -1,7 +1,8 @@
 import pandas as pd
 import cv2
 import numpy as np
-import skdim
+from skdim.id import CorrInt
+from skdim.id import lPCA
 
 #Initialize constants
 MAX_BRIGHTNESS = 255
@@ -25,9 +26,9 @@ for i in range(len(X_contrast)):
 X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 
 #compute two different CD estimators for different k and compute the Eigenvalue estimator
-CD1 = skdim.id.CorrInt(k1=30, k2=50, DM=False).fit_predict(X_contrast)
-CD2 = skdim.id.CorrInt(k1=50, k2=80, DM=False).fit_predict(X_contrast)
-EigValue = skdim.id.lPCA(ver='FO', alphaRatio=0.1, alphaFO=0.1, verbose=False, fit_explained_variance=False).fit_predict(X_contrast)
+CD1 = CorrInt(k1=30, k2=50, DM=False).fit_predict(X_contrast)
+CD2 = CorrInt(k1=50, k2=80, DM=False).fit_predict(X_contrast)
+EigValue = lPCA(ver='FO', alphaRatio=0.1, alphaFO=0.1, verbose=False, fit_explained_variance=False).fit_predict(X_contrast)
 
 #print the different intrinsic dimensionality estimators
 print('CD-measure with 30-50 neighbors{}'.format(CD1))
