@@ -33,7 +33,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   This is the file in which perform the clustering analysis of the reduced data set (omitting the pictures with fist-like signs).
 - `kmedoids.py`
 
-  Here, we analyze the clustering performance of k-medoids on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Again, we use the Homegeneity, Completeness, and V-measure scores.
+  Here, we analyze the clustering performance of k-medoids on the original data as well as the data sets obtained from PCA, Deep Autoencoder, and Denoising Deep Autoencoder models. Again, we use the Homegeneity, Completeness, and V-measure scores. NB: to use the KMedoids module you might need to first `pip install scikit-learn-extra` 
   
 ### 3. Data
 
@@ -73,7 +73,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   
 ### 7. TSNE
   
-  - `tsne.py` is the file in which we apply the t-SNE method to our data.
+  - `tsne.py` is the file in which we apply the t-SNE method to the reduced train data set obtained from the Denoising Deep Autoencoder
 
 ### Other
 - `constants.py`
