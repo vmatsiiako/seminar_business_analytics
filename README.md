@@ -58,7 +58,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
 - `Trustworthiness_continuity.py`
 
-  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets.
+  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets. You can find the skdim package used for the measures [here](https://github.com/j-bac/scikit-dimension). 
   
 ### 6. PCA
 
@@ -72,7 +72,4 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 ### 7. TSNE
   
   - `tsne.py` is the file in which we apply the t_SNE method to out data.
-  
-- [ ] Connect the utils in AE and pcs_reconstruction.py
-- [x] Create a global constants.py
-- [ ] requirements.txt?
+ 
