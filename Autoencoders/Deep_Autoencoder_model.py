@@ -74,6 +74,14 @@ class DeepAutoencoder(nn.Module):
             The number of original features, that is the number of nodes
             for the input layer (default is 784)
 
+        Returns
+        -------
+        float
+            the validation loss for this batch
+        float
+            the training loss for this batch
+        DeepAutoencoder
+            the resulting trained DeepAutoencoder model
         """
 
         # Initialize the list of pretrained models to an empty list
@@ -295,6 +303,14 @@ class DenoisingDeepAutoencoder(nn.Module):
             The number of original features, that is the number of nodes
             for the input layer (default is 784)
 
+        Returns
+        -------
+        float
+            the validation loss for this batch
+        float
+            the training loss for this batch
+        DenoisingDeepAutoencoder
+            the resulting trained DenoisingDeepAutoencoder model
         """
 
         # Initialize the list of pretrained models to an empty list

@@ -13,7 +13,7 @@ from Autoencoders.Deep_Autoencoder_model import DenoisingDeepAutoencoder
 from Autoencoders.Deep_Autoencoder_model import DeepAutoencoder
 from sklearn.model_selection import KFold
 from Autoencoders.utils import create_title, reconstruct
-from constants import MAX_BRIGHTNESS, INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, NUMBER_OF_PIXELS, MEAN
+from constants import INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, MEAN, MAX_BRIGHTNESS, NUMBER_OF_PIXELS
 matplotlib.use('TkAgg')
 
 # CONSTANTS
@@ -204,7 +204,6 @@ X_validation_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEA
 X_validation = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test_contrast = X_test_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
 X_test = X_test.astype('float32') / MAX_BRIGHTNESS - MEAN
-
 # Initialize the model and train it with the full training set and with the optimal hyperparameters
 final_model = DenoisingDeepAutoencoder()
 test_loss, training_loss, final_model = final_model.fit(optimal_pretraining_noise_type,

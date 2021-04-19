@@ -72,6 +72,7 @@ class PretrainingDAE(nn.Module):
         v : DataLoader
             The (batch of) observations to be encoded
         """
+
         p_v = v
         activation = v
         activation = torch.mm(p_v, self.W_encoder) + self.h_bias
@@ -87,6 +88,7 @@ class PretrainingDAE(nn.Module):
         h : DataLoader
             The (batch of) observations to be decoded
         """
+
         p_h = h
         activation = torch.mm(p_h, self.W_decoder.t()) + self.v_bias
         return activation
