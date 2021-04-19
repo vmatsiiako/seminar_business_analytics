@@ -43,10 +43,12 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 - `Final_test_denoising_ae.csv` is the data set containing the reduced test data obtained from the Denoising Deep Autoencoder model.
 - `Final_train_ae.csv` is the data set containing the reduced train data obtained from the Deep Autoencoder model.
 - `Final_test_ae.csv` is the data set containing the reduced test data obtained from the Deep Autoencoder model.
-- `exploratory_data_analysis.py`
-- `preprocessing.py`
+- `exploratory_data_analysis.py` 
 
-  In this file, we preprocess the data sets which will be used after and save them as `.csv` files. 
+  In this file, we perform a quick exploratory data analysis on the original data set and its features. NB: `sns.displot` works only for the latest version (0.11.1) of `seaborn`.
+- `preprocessing.py` 
+
+  This is the file which containes the code necessary to obtain the contrasted and standardized data sets. We do not provide those data sets in the `Data` folder because of the size restriction in GitHub (up to 100Mb).
 
 ### 4. Intrinsic Dimensionality 
 
