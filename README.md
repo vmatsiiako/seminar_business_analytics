@@ -73,7 +73,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   
 ### 7. TSNE
   
-  - `tsne.py` is the file in which we apply the t_SNE method to our data.
+  - `tsne.py` is the file in which we apply the t-SNE method to our data.
 
 ### Other
 - `constants.py`
