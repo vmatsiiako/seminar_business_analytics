@@ -1,9 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 from sklearn.manifold import TSNE
-
 
 # load in train data set
 df = pd.read_csv("../Data/sign_mnist_train.csv")
@@ -12,7 +10,6 @@ y_train = df.iloc[:, 0].values
 
 # load in embedding from autoencoders on train data
 df_ae = pd.read_csv("../Data/Final_train_ae.csv", header=None)
-# df_ae = pd.read_csv("../Data/Final_train_denoising_ae.csv", header=None)
 X_train_ae = df_ae.iloc[:, 0:].values
 
 # run t-SNE on autoencoders output
