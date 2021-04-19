@@ -52,13 +52,13 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
 - `ID_estimation.py` 
 
-  In this file, we estimate the intrinsic dimensionality based on our train data. The two methods used are Correlation Dimension and an algorithm based on eigenvalues.
+  In this file, we estimate the intrinsic dimensionality based on our train data. The two methods used are Correlation Dimension and an algorithm based on eigenvalues. You can find the skdim package used for the measures [here](https://github.com/j-bac/scikit-dimension). 
   
 ### 5. Measures
 
 - `Trustworthiness_continuity.py`
 
-  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets. You can find the skdim package used for the measures [here](https://github.com/j-bac/scikit-dimension). 
+  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets.
   
 ### 6. PCA
 
