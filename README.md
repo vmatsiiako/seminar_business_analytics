@@ -76,7 +76,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
   - `tsne.py` is the file in which we apply the t_SNE method to our data.
 
 ### Other
-- constants.py
+- `constants.py`
 
   In this file, we add the constants that are used throughout the project (e.g., Intrinsic dimensionality, picture dimensions)
  
