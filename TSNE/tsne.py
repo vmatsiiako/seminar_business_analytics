@@ -9,8 +9,8 @@ X_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values
 
 #load in embedding from autoencoders on train data
-df_ae = pd.read_csv("../Data/TEST_FINAL_THIS_TIME_DEFINITELY_FINAL_FINAL_FINAL_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_zeros_P_NOISE_PERCENTAGE_0,5_LAYERS_[620,330,13]_LR_0,001_EPOCH_9.csv", header=None)
-#df_ae = pd.read_csv("../Data/FINAL_DENOISING_reduced_trainset_with_noise__BATCH_SIZE_64_P_NOISE_TYPE_gaussian_P_NOISE_PERCENTAGE_0,1_F_NOISE_TYPE_gaussian_F_NOISE_PERCENTAGE_0,3_LAYERS_[620,330,13]_LR_0,001_EPOCH_32.csv")
+df_ae = pd.read_csv("../Data/Final_train_ae.csv", header=None)
+#df_ae = pd.read_csv("../Data/Final_train_denoising_ae.csv", header=None)
 X_train_ae = df_ae.iloc[:,0:].values
 
 #run t-SNE on autoencoders output
