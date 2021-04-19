@@ -1,4 +1,7 @@
-# Seminar in Business Analytics & Quantitative Marketing 2021. Team 1
+
+# Principal Components Analysis and Autoencoder: a dimensionality reduction comparison using a MNIST data set of American Sign Language 
+
+## Seminar in Business Analytics & Quantitative Marketing 2021. Team 1
 
 Created by: Vladyslav Matsiiako (476414), Anouk Veltman (466547), Luca Zampierin (454696), & Laura Zwiers (468008)
 
