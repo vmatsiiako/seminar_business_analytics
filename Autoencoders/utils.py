@@ -1,6 +1,6 @@
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+# import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
@@ -35,14 +35,14 @@ def add_noise(img, noise_type, parameter=None):
         return img
 
     if noise_type == "zeros":
-        noise = np.random.choice([0, 1], size=(img.shape), p=[parameter, 1 - parameter])
+        noise = np.random.choice([0, 1], size=img.shape, p=[parameter, 1 - parameter])
         img = img * noise
         return img
 
 
 def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter, hidden_layers,
-                 learning_rate_pretraining, learning_rate_finetuning, epoch_pretraining, epoch_finetuning,
-                 finetuning_noise_type = None, finetuning_noise_parameter = None, loss = None):
+                 learning_rate_pretraining, learning_rate_finetuning, epoch_pretraining=None, epoch_finetuning=None,
+                 finetuning_noise_type=None, finetuning_noise_parameter=None, loss=None):
     """Creates the title of pictures or other files to be saved given certain inputs
 
     Parameters
@@ -60,9 +60,9 @@ def create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter
         The learning rate used in the pretraining optimization
     learning_rate_finetuning : float
         The learning rate used in the finetuning optimization
-    epochs_pretraining : int
+    epoch_pretraining : int
         The number of epochs used for the pretraining phase
-    epochs_finetuning : int
+    epoch_finetuning : int
         The number of epochs used for the finetuning phase
     finetuning_noise_type : str
         The type of noise to be used in the pretraining phase (default is None)
@@ -153,7 +153,7 @@ def reconstruct(train_dl, final_model_early_stopping, optimal_batch_size, optima
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-        if i == 9:
+        if i == NUMBER_OF_PICTURES_TO_DISPLAY-1:
             break
 
     plt.savefig(start_name +

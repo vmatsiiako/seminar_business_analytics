@@ -1,6 +1,6 @@
 import random
 import pickle
-import matplotlib
+# import matplotlib
 import torch
 import cv2
 
@@ -14,7 +14,7 @@ from Autoencoders.Deep_Autoencoder_model import DeepAutoencoder
 from sklearn.model_selection import KFold
 from Autoencoders.utils import create_title, reconstruct
 from constants import INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, MEAN, MAX_BRIGHTNESS, NUMBER_OF_PIXELS
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 # CONSTANTS
 EPOCHS_PRETRAINING = 20
@@ -85,6 +85,7 @@ for i in range(NUMBER_COMBINATIONS):
     print(f"Starting CV {str(i + 1)} of " +
           create_title(batch_size, pretraining_noise_type, pretraining_noise_parameter, hidden_layers,
                        learning_rate_pretraining, learning_rate_finetuning,
+                       EPOCHS_PRETRAINING, EPOCHS_FINETUNING,
                        finetuning_noise_type, finetuning_noise_parameter))  # ONLY FOR DENOSING AUTOENCODERS
 
     # Initialize the matrices that will save the training and validation losses for the different folds

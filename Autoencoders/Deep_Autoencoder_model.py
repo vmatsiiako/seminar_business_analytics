@@ -1,11 +1,14 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
+
+from torch.utils.data import DataLoader
+from torch.utils.data import TensorDataset
 from tqdm import tqdm
 from Autoencoders.finetuning_AE import FinetuningAE
 from Autoencoders.pretraining_DAE import PretrainingDAE
 from Autoencoders.utils import add_noise
+
 
 class DeepAutoencoder(nn.Module):
     """
@@ -97,7 +100,7 @@ class DeepAutoencoder(nn.Module):
             # Initialize the denoising autoencoder, the loss criterion and the optimizer
             pretraining_dae = PretrainingDAE(visible_dim=visible_dim, hidden_dim=hidden_dim)
             criterion = nn.MSELoss()
-            optimizer = torch.optim.Adam(pretraining_dae.parameters(), lr=learning_rate_pretraining, weight_decay=1e-5)  #REMOVE WEIGHT_DECAY?
+            optimizer = torch.optim.Adam(pretraining_dae.parameters(), lr=learning_rate_pretraining, weight_decay=1e-5)
 
             epoch_loss = 0
             running_loss = 0
@@ -160,8 +163,8 @@ class DeepAutoencoder(nn.Module):
         loss = nn.MSELoss()
 
         # Initialize the vector to store the validation and training losses
-        val_loss = np.zeros((epochs_finetuning))
-        final_train_loss = np.zeros((epochs_finetuning))
+        val_loss = np.zeros(epochs_finetuning)
+        final_train_loss = np.zeros(epochs_finetuning)
 
         # Transform the clean input and the validation set into Tensors
         trainign_clean_tensor = torch.Tensor(training_set_clean)
@@ -185,12 +188,12 @@ class DeepAutoencoder(nn.Module):
             final_training_loss = 0
 
             # Loop over all batches
-            for i, features in enumerate(training_dl_clean): # Comment in for normal Deep Autoencoder
+            for i, features in enumerate(training_dl_clean):
                 # Forward pass
-                output = final_AE(features[0])    # ONLY FOR DENOISING DEEP AUTOENCODER
+                output = final_AE(features[0])
 
                 # Compute the loss comparing the outputs of the autoencoder to the clean input
-                batch_loss = loss(features[0], output) # Comment in for normal Deep Autoencoder
+                batch_loss = loss(features[0], output)
 
                 # Backward pass
                 optimizer.zero_grad()
@@ -227,6 +230,7 @@ class DeepAutoencoder(nn.Module):
                   f", validation loss = {str(val_loss[epoch])}")
 
         return val_loss, final_train_loss, final_AE
+
 
 class DenoisingDeepAutoencoder(nn.Module):
     """
@@ -326,7 +330,7 @@ class DenoisingDeepAutoencoder(nn.Module):
             # Initialize the denoising autoencoder, the loss criterion and the optimizer
             dae = PretrainingDAE(visible_dim=visible_dim, hidden_dim=hidden_dim)
             criterion = nn.MSELoss()
-            optimizer = torch.optim.Adam(dae.parameters(), lr=learning_rate_pretraining, weight_decay=1e-5)  #REMOVE WEIGHT_DECAY?
+            optimizer = torch.optim.Adam(dae.parameters(), lr=learning_rate_pretraining, weight_decay=1e-5)
 
             epoch_loss = 0
             running_loss = 0
@@ -389,8 +393,8 @@ class DenoisingDeepAutoencoder(nn.Module):
         loss = nn.MSELoss()
 
         # Initialize the vector to store the validation and training losses
-        val_loss = np.zeros((epochs_finetuning))
-        final_train_loss = np.zeros((epochs_finetuning))
+        val_loss = np.zeros(epochs_finetuning)
+        final_train_loss = np.zeros(epochs_finetuning)
 
         # Transform the clean input and the validation set into Tensors
         trainign_clean_tensor = torch.Tensor(training_set_clean)
@@ -409,17 +413,11 @@ class DenoisingDeepAutoencoder(nn.Module):
             # Print the epoch to keep truck of the training process
             print(f"Fine_tuning_Epoch{str(epoch)}")
 
-            # X_train_shuffled = training_set_clean
-            # np.random.shuffle(X_train_shuffled)
-            # X_train_shuffled_tensor = torch.Tensor(X_train_shuffled)
-            # ds_clean_shuffled = TensorDataset(X_train_shuffled_tensor)
-            # dl_clean_shuffled = DataLoader(ds_clean_shuffled, batch_size=batch_size, shuffle=False)
-
             # Construct the noised dataset
             X_finetuning_noise = np.zeros(np.shape(training_set_clean))
             for i in range(len(training_set_clean)):
-                X_finetuning_noise[i,:] = add_noise(training_set_clean[i, :], noise_type=finetuning_noise_type,
-                                                    parameter=finetuning_noise_parameter)
+                X_finetuning_noise[i, :] = add_noise(training_set_clean[i, :], noise_type=finetuning_noise_type,
+                                                     parameter=finetuning_noise_parameter)
             X_finetuning_noise = torch.Tensor(X_finetuning_noise)
 
             # Construct the noised Data Loader
@@ -476,4 +474,3 @@ class DenoisingDeepAutoencoder(nn.Module):
                   f", validation loss = {str(val_loss[epoch])}")
 
         return val_loss, final_train_loss, final_DAE
-

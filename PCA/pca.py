@@ -1,24 +1,25 @@
 import pandas as pd
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.decomposition import PCA
 import cv2
 import seaborn as sns
+# import matplotlib
+# matplotlib.use('TkAgg')
+
+from sklearn.decomposition import PCA
 from constants import MAX_BRIGHTNESS, INTRINSIC_DIMENSIONALITY, PICTURE_DIMENSION, NUMBER_OF_PIXELS, MEAN
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-X_train = df.iloc[:,1:].values
-y_train = df.iloc[:,0].values
+X_train = df.iloc[:, 1:].values
+y_train = df.iloc[:, 0].values
 
-#contrast train data
+# Contrast train data
 X_contrast = np.zeros(np.shape(X_train))
 for i in range(len(X_contrast)):
-    image = X_train[i,:]
+    image = X_train[i, :]
     image = image.astype(np.uint8)
-    X_contrast[i] = cv2.equalizeHist(image).reshape(1,NUMBER_OF_PIXELS)
+    X_contrast[i] = cv2.equalizeHist(image).reshape(1, NUMBER_OF_PIXELS)
 
 # normalize train data
 X_contrast = X_contrast.astype('float32') / MAX_BRIGHTNESS - MEAN
@@ -52,23 +53,23 @@ print(pca.explained_variance_ratio_)
 # ax.grid()
 # plt.show()
 
-#2-Dimensional Plot
+# 2-Dimensional Plot
 pca = PCA(n_components=2)
 principalComponents = pca.fit_transform(X_contrast)
-principalDf = pd.DataFrame(data = principalComponents, columns = ['pc1', 'pc2'])
+principalDf = pd.DataFrame(data=principalComponents, columns=['pc1', 'pc2'])
 
 finalDf = pd.concat([principalDf, df[['label']]], axis=1)
 
-plt.figure(figsize=(18,12))
+plt.figure(figsize=(18, 12))
 plt.title("2-component PCA")
 sns.scatterplot(
     x='pc1', y='pc2',
-    hue = y_train,
+    hue=y_train,
     palette=sns.color_palette("hls", 24),
     data=finalDf,
     legend="full"
 )
 plt.show()
 
-#Print the explained variance
+# Print the explained variance
 print('Explained variance{}'.format(pca.explained_variance_ratio_))

@@ -1,28 +1,26 @@
-import matplotlib
-
+# import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 import seaborn as sns
 
 from constants import MAX_BRIGHTNESS, PICTURE_DIMENSION
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 # load in the data
 df = pd.read_csv("../Data/sign_mnist_train.csv")
-X_train = df.iloc[:,1:].values
-y_train = df.iloc[:,0].values
-X_train_contrast = df.iloc[:,1:].values
-y_train_contrast = df.iloc[:,0].values
+X_train = df.iloc[:, 1:].values
+y_train = df.iloc[:, 0].values
+X_train_contrast = df.iloc[:, 1:].values
+y_train_contrast = df.iloc[:, 0].values
 
 # Visualize feature distribution for original training data
-sns.displot(data=pd.DataFrame(X_train[:,153]), x=0, binwidth=3)  # visualize a distribution of a certain pixel
+sns.displot(data=pd.DataFrame(X_train[:, 153]), x=0, binwidth=3)  # visualize a distribution of a certain pixel
 sns.displot(data=X_train, x=0, binwidth=3)   # visualize the distribution of a certain picture
 plt.xlim(0, MAX_BRIGHTNESS)
 plt.show()
 
 # Visualize feature distribution for contrasted training data
-sns.displot(pd.DataFrame(X_train_contrast[:,153]), x=0, binwidth=3)  # visualize a distribution of a certain pixel
+sns.displot(pd.DataFrame(X_train_contrast[:, 153]), x=0, binwidth=3)  # visualize a distribution of a certain pixel
 sns.displot(X_train_contrast, x=0, binwidth=3)   # visualize the distribution of a certain picture
 plt.xlim(0, MAX_BRIGHTNESS)
 plt.show()
