@@ -60,7 +60,7 @@ The goal of this project is to find out how PCA and autoencoders compare in the 
 
 - `Trustworthiness_continuity.py`
 
-  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets.
+  Here, we perform the calculations of the Trustworthiness and Continuity measures for all the available data sets. You can find the coranking package used for these measures [here](https://github.com/samueljackson92/coranking).
   
 ### 6. PCA
 
